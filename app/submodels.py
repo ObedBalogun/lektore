@@ -13,3 +13,12 @@ class CommonUserDetails(models.Model):
 
     class Meta:
         abstract = True
+
+
+class UserVerificationModel(models.Model):
+    email = models.CharField(max_length=80, null=True, blank=True)
+    otp_is_verified = models.BooleanField(blank=False, default=False)
+    counter = models.IntegerField(default=0, blank=False)  # For non-timed otp Verification
+
+    def __str__(self):
+        return str(self.email)

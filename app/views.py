@@ -61,3 +61,5 @@ class UserLogout(generics.GenericAPIView):
             if response.get("error", None)
             else status.HTTP_204_NO_CONTENT,
         )
+
+

@@ -1,14 +1,22 @@
 from typing import Type
 
 from django.contrib.auth import authenticate
-from django.db import IntegrityError
+from django.template.loader import render_to_string
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
 from app.Tutee.models import TuteeProfile
 from app.Tutor.models import TutorProfile
-from app.helpers import user_login, user_logout
+from app.submodels import UserVerificationModel
+
+from app.helpers import user_login, user_logout, generate_key
+from decouple import config
+import base64
+import pyotp
+
+from app.utils.utils import EmailManager
+from lektore import settings
 
 
 class UserService:
@@ -67,3 +75,75 @@ class UserService:
     def app_user_logout(cls, request):
         user_logout(request)
         return dict(message="User successfully logged out")
+
+
+class OTPService:
+    @classmethod
+    def _generate_or_verify_timed_otp(cls, email, verify=False, user_otp=None):
+        expiry_time = int(config("RESET_EXPIRY_TIME"))  # seconds
+        if verify:
+            try:
+                verification_model = UserVerificationModel.objects.get(email=email)
+            except UserVerificationModel.DoesNotExist:
+                return dict(error="User does not exist")
+        else:
+            verification_model = UserVerificationModel.objects.get_or_create(
+                email=email
+            )
+        keygen: str = generate_key(email)
+        key = base64.b32encode(
+            keygen.encode()
+        )  # Key is generated
+        otp = pyotp.TOTP(key, 4, interval=expiry_time)  # TOTP Model for OTP is created
+        if verify:
+            if otp.verify(user_otp):
+                verification_model.otp_is_verified = True
+                verification_model.save()
+            return otp.verify(user_otp)
+        return otp, expiry_time / 60, verification_model
+
+    @classmethod
+    def request_otp(cls, request, verified=False, user_email=None):
+        authenticated_user = request.user
+        username = authenticated_user.username
+        if not verified:
+            try:
+                verification_model = UserVerificationModel.objects.get(email=authenticated_user.email)
+
+            except UserVerificationModel.DoesNotExist:
+                return dict(error="User not found")
+
+        otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(user_email)
+
+        url = f"{settings.LEKTORE_URL}/verify-email?email={user_email}&otp={otp.at(verification_model.counter)}"
+        email_template_name = "email_template/email_verfication.txt"
+        domain = request.META["HTTP_HOST"]
+        site_name = "Lektore"
+        data = {
+            "email": user_email,
+            "domain": domain,
+            "site_name": site_name,
+            "user": authenticated_user.id,
+            "url": url
+        }
+        email_body = render_to_string(email_template_name, data)
+        subject = "Lektore Verification"
+        email_data = {
+            'email_subject': subject,
+            'email_body': email_body,
+            'to_email': user_email
+        }
+
+        EmailManager.send_email(email_data)
+        return dict(success="Verification mail has been sent")
+
+    @classmethod
+    def verify_email_otp(cls, request, **kwargs):
+        user_otp = kwargs.get("otp", request.GET.get("otp"))
+        user_id = kwargs.get("user_id", request.GET.get("user_id"))
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return dict(error="User does not exist")
+        verified = cls._generate_or_verify_timed_otp(user.email, verify=True, user_otp=user_otp)
+        return dict(success="OTP verified successfully") if verified else dict(error="Invalid OTP")

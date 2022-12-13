@@ -1,5 +1,7 @@
 from django.contrib.auth import login, logout, user_logged_in, user_logged_out
 from rest_framework.authtoken.models import Token
+from datetime import datetime
+from django.conf import settings
 
 
 def user_login(request, user):
@@ -17,3 +19,10 @@ def user_logout(request):
         )
     logout(request)
 
+
+def generate_key(email) -> str:
+    return (
+            str(email).lower()
+            + str(datetime.date(datetime.now()))
+            + settings.SECRET_KEY
+    )

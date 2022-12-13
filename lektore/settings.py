@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'app.apps.AppConfig',
 
 ]
+LEKTORE_URL = ""
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -107,7 +108,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     )
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
