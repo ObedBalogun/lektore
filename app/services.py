@@ -10,7 +10,7 @@ from app.Tutee.models import TuteeProfile
 from app.Tutor.models import TutorProfile
 from app.submodels import UserVerificationModel
 
-from app.helpers import user_login, user_logout, generate_key
+from app.helpers import user_login, user_logout, generate_key, GenerateID
 from decouple import config
 import base64
 import pyotp
@@ -43,7 +43,8 @@ class UserService:
                 user.set_password(password)
                 user.save()
                 if role == 'tutor':
-                    app_user = TutorProfile.objects.create(user=user, phone_number=phone_number,
+                    tutor_id = GenerateID.generate_id(TutorProfile, 5)
+                    app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
                                                            nationality=nationality, gender=gender)
                 if role == 'tutee':
                     app_user = TuteeProfile.objects.create(user=user)

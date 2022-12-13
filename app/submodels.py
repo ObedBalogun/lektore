@@ -5,6 +5,14 @@ from app.commons import GENDER
 USER_ROLES = (('tutor', 'Tutor'), ('student', 'Student'))
 
 
+class Timestamp(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
 class CommonUserDetails(models.Model):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     nationality = CountryField(blank=True)

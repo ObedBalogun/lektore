@@ -1,3 +1,6 @@
+import string
+import uuid
+
 from django.contrib.auth import login, logout, user_logged_in, user_logged_out
 from rest_framework.authtoken.models import Token
 from datetime import datetime
@@ -26,3 +29,32 @@ def generate_key(email) -> str:
             + str(datetime.date(datetime.now()))
             + settings.SECRET_KEY
     )
+
+
+class GenerateID:
+    chars = string.ascii_lowercase + string.digits
+
+    @classmethod
+    def _format_id(cls, category, length):
+        return f"{category}-{uuid.uuid4().hex[:length].upper()}"
+
+    @classmethod
+    def generate_id(cls, model, length) -> str:
+        id_category = model.__name__.lower()
+        exists = True
+        generated_id = ""
+        while exists:
+            object_id = dict()
+            if id_category == "tutorprofile":
+                generated_id = cls._format_id("LKT", length)
+                object_id["tutor_id"] = generated_id
+            elif id_category == "tuteeprofile":
+                generated_id = cls._format_id("LEK", length)
+                object_id["tutee_id"] = generated_id
+            elif id_category == "course":
+                generated_id = cls._format_id("CRS", length)
+                object_id["course_id"] = generated_id
+            obj_exists = model.objects.filter(**object_id).exists()
+            if not obj_exists:
+                break
+        return generated_id

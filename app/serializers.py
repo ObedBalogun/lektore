@@ -14,6 +14,11 @@ def inline_serializer(*, fields, data=None, **kwargs):
     return serializer_class(**kwargs)
 
 
+
+
+
+
+
 class UserSerializer(serializers.Serializer):
     password = serializers.CharField(style={"input_type": "password"}, required=True)
     first_name = serializers.CharField(max_length=50)
