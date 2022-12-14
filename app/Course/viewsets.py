@@ -29,3 +29,50 @@ class CourseViewSets(viewsets.ViewSet):
             if response.get("error", None)
             else status.HTTP_200_OK,
         )
+
+    @action(detail=False, methods=["get"], url_path="get-course")
+    def get_course_by_id(self, request):
+        course_code = request.GET.get("course_id")
+        response = CourseService.get_course(course_code)
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["get"], url_path="all-courses")
+    def get_all_courses(self, request):
+        response = CourseService.get_course()
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK
+        )
+
+
+    @action(detail=False, methods=["get"], url_path="get-course-by-tutor")
+    def get_course_by_tutor(self, request):
+        tutor_id = request.GET.get("tutor_id")
+        response = CourseService.get_course_by_tutor(tutor_id)
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK
+        )
+    @action(detail=False, methods=["get"], url_path="delete-course")
+    def delete_course(self, request):
+        course_code = request.GET.get("course_id")
+        response = CourseService.delete_course(course_code)
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK
+        )
