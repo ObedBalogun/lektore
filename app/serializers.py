@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 
 
 def create_serializer_class(name, fields):
@@ -14,9 +15,10 @@ def inline_serializer(*, fields, data=None, **kwargs):
     return serializer_class(**kwargs)
 
 
-
-
-
+class TutorUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'username', 'email')
 
 
 class UserSerializer(serializers.Serializer):

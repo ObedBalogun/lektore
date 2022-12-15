@@ -169,6 +169,6 @@ class SearchBarService:
             query_fields = [_object.__dict__.values()]
             for field in query_fields:
                 if search_param.lower() in str(field).lower():
-                    result_list.append(model_to_dict(_object,exclude=["id"]))
+                    result_list.append(model_to_dict(_object, exclude=["id", "nationality"]))
                     break
         return result_list

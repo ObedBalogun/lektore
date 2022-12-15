@@ -12,9 +12,11 @@ router.register(r"course", CourseViewSets, basename="course")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path('tutor/', include('app.Tutor.urls')),
     path('register-user/', UserRegistrationAPIView.as_view()),
     path('user-login/', UserLogin.as_view()),
     path('user-logout/', UserLogout.as_view()),
     path('search/', SearchBar.as_view()),
+
 
 ]
