@@ -5,7 +5,9 @@ from django.template.loader import render_to_string
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.forms import model_to_dict
 
+from app.Course.models import Course, Module
 from app.Tutee.models import TuteeProfile
 from app.Tutor.models import TutorProfile
 from app.submodels import UserVerificationModel
@@ -109,7 +111,7 @@ class OTPService:
         username = authenticated_user.username
         if not verified:
             try:
-                verification_model = UserVerificationModel.objects.get(email=authenticated_user.email)
+                verification_model = UserVerificationModel.objects.get(user__email=authenticated_user.email)
 
             except UserVerificationModel.DoesNotExist:
                 return dict(error="User not found")
@@ -148,3 +150,25 @@ class OTPService:
             return dict(error="User does not exist")
         verified = cls._generate_or_verify_timed_otp(user.email, verify=True, user_otp=user_otp)
         return dict(success="OTP verified successfully") if verified else dict(error="Invalid OTP")
+
+
+class SearchBarService:
+    @classmethod
+    def query_database(cls, search_param) -> dict:
+        search_models = [TutorProfile, TuteeProfile, Course, Module]
+        result_dict = {model.__name__: cls._search(model, search_param) for model in search_models}
+        if list(result_dict.values()).count([]) == len(search_models):
+            return dict(data={}, message=f"No results found for {search_param}")
+        return dict(data=result_dict, message="Search results")
+
+    @classmethod
+    def _search(cls, model, search_param) -> list:
+        result_list = []
+        query_set = model.objects.all()
+        for _object in query_set:
+            query_fields = [_object.__dict__.values()]
+            for field in query_fields:
+                if search_param.lower() in str(field).lower():
+                    result_list.append(model_to_dict(_object,exclude=["id"]))
+                    break
+        return result_list

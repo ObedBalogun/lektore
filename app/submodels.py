@@ -1,6 +1,8 @@
 from django.db import models
 from django_countries.fields import CountryField
 from app.commons import GENDER
+from django.contrib.auth.models import User
+
 
 USER_ROLES = (('tutor', 'Tutor'), ('student', 'Student'))
 
@@ -24,6 +26,7 @@ class CommonUserDetails(models.Model):
 
 
 class UserVerificationModel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.CharField(max_length=80, null=True, blank=True)
     otp_is_verified = models.BooleanField(blank=False, default=False)
     counter = models.IntegerField(default=0, blank=False)  # For non-timed otp Verification

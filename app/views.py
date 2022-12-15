@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from app.serializers import UserSerializer, UserDetailsSerializer
-from app.services import UserService
+from app.services import UserService, SearchBarService
 from app.utils.utils import ResponseManager
 
 
@@ -52,6 +52,7 @@ class UserLogin(generics.GenericAPIView):
 
 class UserLogout(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
+
     def post(self, request, format=None):
         response = UserService.app_user_logout(request)
         return ResponseManager.handle_response(
@@ -63,3 +64,14 @@ class UserLogout(generics.GenericAPIView):
         )
 
 
+class SearchBar(generics.GenericAPIView):
+    def get(self, request, format=None):
+        query_param = request.GET.get("query_param")
+        response = SearchBarService.query_database(query_param)
+        return ResponseManager.handle_response(
+            message=response.get("message", None),
+            data=response.get("data", None),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK,
+        )

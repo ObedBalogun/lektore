@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from app.Course.viewsets import CourseViewSets
-from app.views import UserRegistrationAPIView, UserLogin, UserLogout
+from app.views import UserRegistrationAPIView, UserLogin, UserLogout, SearchBar
 from app.viewsets import OTPViewSet
 
 router = DefaultRouter()
@@ -15,5 +15,6 @@ urlpatterns = [
     path('register-user/', UserRegistrationAPIView.as_view()),
     path('user-login/', UserLogin.as_view()),
     path('user-logout/', UserLogout.as_view()),
+    path('search/', SearchBar.as_view()),
 
 ]
