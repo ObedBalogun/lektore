@@ -77,11 +77,11 @@ WSGI_APPLICATION = 'lektore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DB_NAME = config('TEST_DB_NAME')
-DB_USER = config('TEST_DB_USER')
-DB_HOST = config('TEST_DB_HOST')
-DB_PORT = config('TEST_DB_PORT')
-DB_PASSWORD = config('TEST_DB_PASSWORD')
+DB_NAME = config('DB_NAME')
+DB_USER = config('DB_USER')
+DB_HOST = config('DB_HOST')
+DB_PORT = config('DB_PORT')
+DB_PASSWORD = config('DB_PASSWORD')
 
 DB_DETAILS = {
     'ENGINE': 'django.db.backends.postgresql',
