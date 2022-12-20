@@ -44,13 +44,15 @@ class UserService:
                                            password=password)
                 user.set_password(password)
                 user.save()
+                app_user = ""
                 if role == 'tutor':
                     tutor_id = GenerateID.generate_id(TutorProfile, 5)
                     app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
                                                            nationality=nationality, gender=gender)
                 if role == 'tutee':
+                    tutee_id = GenerateID.generate_id(TuteeProfile, 5)
                     app_user = TuteeProfile.objects.create(user=user)
-                return dict(data=email, message=f"{role} with email, {email} successfully created")
+                return dict(data=model_to_dict(app_user, exclude=["nationality","id"]), message=f"{role} with email, {email} successfully created")
 
         except Exception as e:
             print(e)

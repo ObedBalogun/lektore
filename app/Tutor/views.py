@@ -10,7 +10,7 @@ class TutorProfileView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
-        tutor_id = request.GET.get("tutor_id",None)
+        tutor_id = request.GET.get("tutor_id", None)
         response = TutorService.get_tutor(tutor_id=tutor_id)
         return ResponseManager.handle_response(
             errors=response.get("error", None),

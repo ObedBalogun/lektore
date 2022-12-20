@@ -65,6 +65,7 @@ class UserLogout(generics.GenericAPIView):
 
 
 class SearchBar(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
     def get(self, request, format=None):
         query_param = request.GET.get("query_param")
         response = SearchBarService.query_database(query_param)
