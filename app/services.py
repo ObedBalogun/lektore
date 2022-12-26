@@ -52,7 +52,8 @@ class UserService:
                 if role == 'tutee':
                     tutee_id = GenerateID.generate_id(TuteeProfile, 5)
                     app_user = TuteeProfile.objects.create(user=user)
-                return dict(data=model_to_dict(app_user, exclude=["nationality","id"]), message=f"{role} with email, {email} successfully created")
+                return dict(data=model_to_dict(app_user, exclude=["nationality", "id"]),
+                            message=f"{role} with email, {email} successfully created")
 
         except Exception as e:
             print(e)
@@ -84,44 +85,40 @@ class UserService:
 
 class OTPService:
     @classmethod
-    def _generate_or_verify_timed_otp(cls, email, verify=False, user_otp=None):
+    def _generate_or_verify_timed_otp(cls, user, email, verify_otp=False, user_otp=None):
         expiry_time = int(config("RESET_EXPIRY_TIME"))  # seconds
-        if verify:
+        if verify_otp:
             try:
                 verification_model = UserVerificationModel.objects.get(email=email)
             except UserVerificationModel.DoesNotExist:
                 return dict(error="User does not exist")
         else:
-            verification_model = UserVerificationModel.objects.get_or_create(
-                email=email
+            verification_model, _ = UserVerificationModel.objects.get_or_create(
+                user=user,
+                email=email,
             )
-        keygen: str = generate_key(email)
-        key = base64.b32encode(
-            keygen.encode()
+        raw_token: str = generate_key(email)
+        encoded_token = base64.b32encode(
+            raw_token.encode()
         )  # Key is generated
-        otp = pyotp.TOTP(key, 4, interval=expiry_time)  # TOTP Model for OTP is created
-        if verify:
-            if otp.verify(user_otp):
-                verification_model.otp_is_verified = True
-                verification_model.save()
+        otp = pyotp.TOTP(encoded_token, 4, interval=expiry_time)  # TOTP Model for OTP is created
+
+        if not verify_otp:
+            return otp, expiry_time / 60, verification_model
+        if otp.verify(user_otp):
+            verification_model.otp_is_verified = True
+            verification_model.save()
             return otp.verify(user_otp)
-        return otp, expiry_time / 60, verification_model
 
     @classmethod
-    def request_otp(cls, request, verified=False, user_email=None):
+    def request_otp(cls, request):
         authenticated_user = request.user
-        username = authenticated_user.username
-        if not verified:
-            try:
-                verification_model = UserVerificationModel.objects.get(user__email=authenticated_user.email)
+        user_email = authenticated_user.email
 
-            except UserVerificationModel.DoesNotExist:
-                return dict(error="User not found")
+        otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
 
-        otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(user_email)
-
-        url = f"{settings.LEKTORE_URL}/verify-email?email={user_email}&otp={otp.at(verification_model.counter)}"
-        email_template_name = "email_template/email_verfication.txt"
+        url = f"{settings.LEKTORE_URL}/verify-email?email={authenticated_user.email}&otp={otp.now()}"
+        email_template_name = "email_template/email_verification.txt"
         domain = request.META["HTTP_HOST"]
         site_name = "Lektore"
         data = {
@@ -140,17 +137,17 @@ class OTPService:
         }
 
         EmailManager.send_email(email_data)
-        return dict(success="Verification mail has been sent")
+        return dict(message="Verification mail has been sent")
 
     @classmethod
     def verify_email_otp(cls, request, **kwargs):
         user_otp = kwargs.get("otp", request.GET.get("otp"))
-        user_id = kwargs.get("user_id", request.GET.get("user_id"))
+        email = kwargs.get("email", request.GET.get("email"))
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(email=email)
         except User.DoesNotExist:
             return dict(error="User does not exist")
-        verified = cls._generate_or_verify_timed_otp(user.email, verify=True, user_otp=user_otp)
+        verified = cls._generate_or_verify_timed_otp(user, user.email, verify_otp=True, user_otp=user_otp)
         return dict(success="OTP verified successfully") if verified else dict(error="Invalid OTP")
 
 

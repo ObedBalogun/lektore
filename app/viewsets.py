@@ -14,7 +14,7 @@ class OTPViewSet(viewsets.ViewSet):
         response = OTPService.request_otp(request)
         return ResponseManager.handle_response(
             errors=response.get("error", None),
-            message=response.get("success", None),
+            message=response.get("message", None),
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
             else status.HTTP_200_OK
@@ -30,3 +30,4 @@ class OTPViewSet(viewsets.ViewSet):
             if response.get("error", None)
             else status.HTTP_200_OK
         )
+

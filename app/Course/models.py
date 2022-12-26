@@ -21,7 +21,7 @@ class Course(Timestamp):
 
 
 class Module(Timestamp):
-    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     module_name = models.CharField(max_length=256)
     module_description = models.TextField()
     module_duration = models.FloatField(default=0)

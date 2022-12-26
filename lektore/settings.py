@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'app.apps.AppConfig',
 
 ]
-LEKTORE_URL = ""
+LEKTORE_URL = "http://35.93.0.127:8000/"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'lektore.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,11 +77,11 @@ WSGI_APPLICATION = 'lektore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DB_NAME = config('DB_NAME')
-DB_USER = config('DB_USER')
-DB_HOST = config('DB_HOST')
-DB_PORT = config('DB_PORT')
-DB_PASSWORD = config('DB_PASSWORD')
+DB_NAME = config('TEST_DB_NAME')
+DB_USER = config('TEST_DB_USER')
+DB_HOST = config('TEST_DB_HOST')
+DB_PORT = config('TEST_DB_PORT')
+DB_PASSWORD = config('TEST_DB_PASSWORD')
 
 DB_DETAILS = {
     'ENGINE': 'django.db.backends.postgresql',
@@ -95,6 +95,14 @@ DB_DETAILS = {
 DATABASES = {
     'default': DB_DETAILS
 }
+
+
+# EMAIL SETUP
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

@@ -1,4 +1,4 @@
-from app.Course.models import Course
+from app.Course.models import Course, Module
 from app.Tutor.models import TutorProfile
 from app.helpers import GenerateID
 from django.forms import model_to_dict
@@ -50,4 +50,18 @@ class CourseService:
             return dict(message=f"{course.course_name} deleted successfully")
         except Course.DoesNotExist:
             return dict(error=f"Course {course_id} does not exist")
+
+class ModuleService:
+    @classmethod
+    def create_module(cls, **kwargs):
+        module_details = kwargs.copy()
+        course_id = kwargs.get("course_id")
+        try:
+            course = Course.objects.get(course_id=course_id)
+            module_details['course'] = course
+            module = Module.objects.create(**module_details)
+            return dict(message=f"module for course, {course.course_name}, created successfully",
+                        data=model_to_dict(module, exclude=["id"]))
+        except Course.DoesNotExist:
+            return dict(error="Error creating module")
 

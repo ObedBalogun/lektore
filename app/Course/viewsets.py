@@ -2,6 +2,7 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 
 from app.Course.models import Course
+from rest_framework import status, serializers
 from app.Course.serializers import CourseSerializer
 from app.Course.services import CourseService
 from app.serializers import inline_serializer
@@ -53,7 +54,6 @@ class CourseViewSets(viewsets.ViewSet):
             else status.HTTP_200_OK
         )
 
-
     @action(detail=False, methods=["get"], url_path="get-course-by-tutor")
     def get_course_by_tutor(self, request):
         tutor_id = request.GET.get("tutor_id")
@@ -65,6 +65,7 @@ class CourseViewSets(viewsets.ViewSet):
             if response.get("error", None)
             else status.HTTP_200_OK
         )
+
     @action(detail=False, methods=["get"], url_path="delete-course")
     def delete_course(self, request):
         course_code = request.GET.get("course_id")
@@ -75,4 +76,33 @@ class CourseViewSets(viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
             else status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["post"], url_path="create-course")
+    def create_module(self, request):
+        serialized_data = inline_serializer(
+            fields={
+                "course": CourseSerializer(),
+                "module_name": serializers.CharField(max_length=256),
+                "module_description": serializers.CharField(),
+                "module_duration": serializers.FloatField(),
+                "module_video": serializers.URLField(),
+                "module_pdf": serializers.URLField()
+            },
+            data=request.data
+        )
+
+        if not serialized_data.is_valid():
+            return ResponseManager.handle_response(
+                errors=serialized_data.errors,
+                message="Course was not created.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        response = CourseService.create_course(**serialized_data.data)
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK,
         )

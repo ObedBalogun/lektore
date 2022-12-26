@@ -7,8 +7,10 @@ from app.viewsets import OTPViewSet
 
 router = DefaultRouter()
 
+# Email Verification Endpoint
 router.register(r"user-otp", OTPViewSet, basename="user-otp")
 router.register(r"course", CourseViewSets, basename="course")
+# router.register(r"course", ModuleViewSets, basename="module")
 
 urlpatterns = [
     path("", include(router.urls)),
