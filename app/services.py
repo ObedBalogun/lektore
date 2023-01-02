@@ -69,11 +69,15 @@ class UserService:
         try:
             user = User.objects.get(username=username)
             _user = authenticate(username=username, password=password)
-            if _user is not None:
-                _login: Type[Token] = user_login(request, user)
-                return dict(data=_login.key, message=f"User {username} successfully logged in")
-            else:
+            if _user is None:
                 return dict(error=status.HTTP_401_UNAUTHORIZED)
+            _login: Type[Token] = user_login(request, user)
+            try:
+                otp_is_verified = UserVerificationModel.objects.get(email=username).otp_is_verified
+            except UserVerificationModel.DoesNotExist:
+                otp_is_verified = False
+            return dict(data={"token": _login.key, "email_is_verified": otp_is_verified},
+                        message=f"User {username} successmfully logged in")
         except User.DoesNotExist:
             return dict(error=f"User with username {username} not found")
 

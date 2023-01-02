@@ -9,7 +9,6 @@ class TutorProfile(CommonUserDetails, Timestamp):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     is_verified = models.BooleanField(default=False)
     is_qualified = models.BooleanField(default=False)
-    otp_is_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
