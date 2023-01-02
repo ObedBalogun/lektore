@@ -136,8 +136,10 @@ u + .em_body .em_full_wrap { width:100% !important; width:100vw !important;}
               <tr>
                 <td class="em_grey" align="center" valign="top" style="font-family: Arial, sans-serif; font-size: 16px;
                  line-height: 26px; color:#434343;">
-                    You&#8217;re almost ready to fully start enjoying a <b> Lektore  Account </b>,
-                    Simply click the button below to verify your email address:
+                    <b>Welcome to Lektore</b>
+                    <br/>
+                    We are excited to have you join us. <br/>
+                    Please click the link below to verify your email
                    </td>
               </tr>
               <tr>
