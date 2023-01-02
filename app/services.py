@@ -77,7 +77,7 @@ class UserService:
             except UserVerificationModel.DoesNotExist:
                 otp_is_verified = False
             return dict(data={"token": _login.key, "email_is_verified": otp_is_verified},
-                        message=f"User {username} successmfully logged in")
+                        message=f"User {username} successfully logged in")
         except User.DoesNotExist:
             return dict(error=f"User with username {username} not found")
 
