@@ -112,12 +112,15 @@ class OTPService:
 
     @classmethod
     def request_otp(cls, request):
+        env = config("ENV")
+        lektore_url = config("LEKTORE_URL_PROD") if env == "PROD" else config("LEKTORE_URL_TEST")
+
         authenticated_user = request.user
         user_email = authenticated_user.email
 
         otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
 
-        url = f"{settings.LEKTORE_URL}/verify-email?email={authenticated_user.email}&otp={otp.now()}"
+        url = f"{lektore_url}/verify-email?email={authenticated_user.email}&otp={otp.now()}"
         email_template_name = "email_template/email_verification.txt"
         domain = request.META["HTTP_HOST"]
         site_name = "Lektore"
