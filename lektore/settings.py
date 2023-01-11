@@ -30,6 +30,7 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +44,20 @@ INSTALLED_APPS = [
     'app.apps.AppConfig',
 
 ]
+
 LEKTORE_URL = "http://35.93.0.127:8000/"
+
+ASGI_APPLICATION = 'lektore.asgi.application'
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(config('REDIS_HOST', '127://0.0.1'), config("REDIS_PORT"))],
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

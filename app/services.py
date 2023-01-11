@@ -18,8 +18,6 @@ import base64
 import pyotp
 
 from app.utils.utils import EmailManager
-from lektore import settings
-
 
 class UserService:
     @classmethod
