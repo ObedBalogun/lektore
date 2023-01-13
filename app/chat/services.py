@@ -22,6 +22,12 @@ class ChatService:
             user_category_id = user.tutee_id
         return user, user_category_id
 
+    @classmethod
+    def get_chat_history(cls, thread):
+        messages = thread.messages.all().order_by("-timestamp")[:50]
+        message_count = thread.messages.all().count()
+        return messages, message_count
+
     @staticmethod
     def get_tutor(tutor_id):
         try:
