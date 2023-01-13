@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from app.Course.viewsets import CourseViewSets
+from app.chat.viewsets import ChatThreadViewSet, ChatMessageViewSet
 from app.views import UserRegistrationAPIView, UserLogin, UserLogout, SearchBar
 from app.viewsets import OTPViewSet
 
@@ -10,6 +11,10 @@ router = DefaultRouter()
 # Email Verification Endpoint
 router.register(r"user-otp", OTPViewSet, basename="user-otp")
 router.register(r"course", CourseViewSets, basename="course")
+router.register(r"user-conversations", ChatThreadViewSet, basename="chat")
+router.register(r"chat-messages", ChatMessageViewSet)
+
+
 # router.register(r"course", ModuleViewSets, basename="module")
 
 urlpatterns = [

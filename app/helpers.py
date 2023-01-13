@@ -31,6 +31,8 @@ def generate_key(email) -> str:
     )
 
 
+
+
 class GenerateID:
     chars = string.ascii_lowercase + string.digits
 
@@ -60,9 +62,3 @@ class GenerateID:
         return generated_id
 
 
-# class UUIDEncoder(json.JSONEncoder):
-#     def default(self, obj):
-#         if isinstance(obj, UUID):
-#             # if the obj is uuid, we simply return the value of uuid
-#             return obj.hex
-#         return json.JSONEncoder.default(self, obj)

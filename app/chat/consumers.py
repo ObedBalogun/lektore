@@ -1,13 +1,10 @@
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
-from django.contrib.auth.models import User
 
-from app.Tutee.models import TuteeProfile
-from app.Tutor.models import TutorProfile
 from app.chat.models import ChatThread, ChatMessage
-from app.chat.serializers import MessageSerializer
-from app.serializers import inline_serializer
+from app.chat.serializers import ChatMessageSerializer
+from app.chat.services import ChatService
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -38,11 +35,20 @@ class ChatConsumer(WebsocketConsumer):
             'message': 'Socket Connected'
         }))
         # fetch chat history
+        # messages = self.thread.messages.all().order_by("-timestamp")[:50]
+        # self.send(text_data=json.dumps({
+        #     "type": "last_50_messages",
+        #     "messages": ChatMessageSerializer(messages, many=True).data,
+        # }))
         messages = self.thread.messages.all().order_by("-timestamp")[:50]
-        self.send(text_data=json.dumps({
-            "type": "last_50_messages",
-            "messages": MessageSerializer(messages, many=True).data,
-        }))
+        message_count = self.thread.messages.all().count()
+        self.send(text_data=json.dumps(
+            {
+                "type": "last_50_messages",
+                "messages": ChatMessageSerializer(messages, many=True).data,
+                "has_more": message_count > 50,
+            }
+        ))
 
     def disconnect(self, close_code):
         print("disconnected")
@@ -55,7 +61,7 @@ class ChatConsumer(WebsocketConsumer):
         if message_type == "chat_message":
             chat_message = ChatMessage.objects.create(
                 sender=self.user,
-                receiver=self.chat_receiver(),
+                receiver=ChatService.get_chat_receiver(self.thread_name, self.user),
                 content=message,
                 thread=self.thread
             )
@@ -64,32 +70,10 @@ class ChatConsumer(WebsocketConsumer):
                 {
                     "type": "chat_message_echo",
                     "name": self.user.username,
-                    "message": MessageSerializer(chat_message).data,
+                    "message": ChatMessageSerializer(chat_message).data,
                 },
             )
 
     def chat_message_echo(self, event):
         self.send(json.dumps(event))
 
-    def chat_receiver(self):
-        user_ids = self.thread_name.split("__")
-        for user_id in user_ids:
-            user = self.get_tutor(user_id) if "LKT" in user_id else self.get_tutee(user_id)
-            if user != self.user:
-                return user
-
-    @staticmethod
-    def get_tutor(tutor_id):
-        try:
-            tutor = TutorProfile.objects.get(tutor_id=tutor_id)
-            return tutor.user
-        except TutorProfile.DoesNotExist:
-            return None
-
-    @staticmethod
-    def get_tutee(tutee_id):
-        try:
-            tutee = TutorProfile.objects.get(tutee_id=tutee_id)
-            return tutee.user
-        except TuteeProfile.DoesNotExist:
-            return None
