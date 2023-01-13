@@ -12,7 +12,7 @@ router = DefaultRouter()
 router.register(r"user-otp", OTPViewSet, basename="user-otp")
 router.register(r"course", CourseViewSets, basename="course")
 router.register(r"user-conversations", ChatThreadViewSet, basename="chat")
-router.register(r"chat-messages", ChatMessageViewSet)
+router.register(r"chat-messages", ChatMessageViewSet, basename="chat-thread")
 
 
 # router.register(r"course", ModuleViewSets, basename="module")

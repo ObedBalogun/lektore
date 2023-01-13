@@ -10,8 +10,8 @@ from django.db import close_old_connections
 
 class TokenAuthMiddleware:
     """
-    Custom middleware that takes a token from the query
-    params and authenticates via Django Rest Framework authtoken.
+    Custom middleware that takes a token from the headers
+     and authenticates via Django Rest Framework authtoken.
     """
 
     def __init__(self, app):
