@@ -63,11 +63,12 @@ class ChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        message = text_data_json['message']
         message_type = text_data_json['type']
         receiver = ChatService.get_chat_receiver(self.thread_name, self.user)
 
         if message_type == "chat_message":
-            message = text_data_json['message']
+            # message = text_data_json['message']
             chat_message = ChatMessage.objects.create(
                 sender=self.user,
                 receiver=receiver,
@@ -84,13 +85,13 @@ class ChatConsumer(WebsocketConsumer):
                 },
             )
             # notify receiver
-            notification_group_name = f"{receiver.username}__notifications"
+            notification_group_name = f"{receiver.username}__notifications".replace('@', '_')
             async_to_sync(self.channel_layer.group_send)(
                 notification_group_name,
                 {
                     "type": "new_message_notification",
                     "name": self.user.username,
-                    "message": ChatMessageSerializer(message).data,
+                    "message": ChatMessageSerializer(chat_message).data,
                 },
             )
         elif message_type == "typing":
@@ -102,6 +103,19 @@ class ChatConsumer(WebsocketConsumer):
                     "typing": text_data_json["typing"],
                 },
             )
+        elif message_type == "read_messages":
+            messages_to_me = self.thread.messages.filter(receiver=self.user)
+            messages_to_me.update(read=True)
+
+            # Update the unread message count
+            unread_count = ChatMessage.objects.filter(receiver=self.user, read=False).count()
+            async_to_sync(self.channel_layer.group_send)(
+                f"{self.user.username}__notifications",
+                {
+                    "type": "unread_count",
+                    "unread_count": unread_count,
+                },
+            )
 
     ##########Event Methods##########
     def broadcast_message(self, event):
@@ -111,6 +125,9 @@ class ChatConsumer(WebsocketConsumer):
         self.send(json.dumps(event))
 
     def new_message_notification(self, event):
+        self.send(json.dumps(event))
+
+    def unread_count(self, event):
         self.send(json.dumps(event))
 
 
@@ -127,7 +144,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
 
         self.accept()
 
-        self.notification_group_name = f"{self.user.username}__notifications"
+        self.notification_group_name = f"{self.user.username}__notifications".replace('@', '_')
         async_to_sync(self.channel_layer.group_add)(
             self.notification_group_name,
             self.channel_name,
@@ -150,4 +167,7 @@ class NotificationConsumer(JsonWebsocketConsumer):
 
     ##########Event Methods##########
     def new_message_notification(self, event):
+        self.send_json(event)
+
+    def unread_count(self, event):
         self.send_json(event)
