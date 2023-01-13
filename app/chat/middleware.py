@@ -5,27 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.authtoken.models import Token
-
-
-@database_sync_to_async
-def get_user(scope):
-    """
-    Return the user model instance associated with the given scope.
-    If no user is retrieved, return an instance of `AnonymousUser`.
-    """
-    if "token" not in scope:
-        raise ValueError(
-            "Cannot find token in scope. You should wrap your consumer in "
-            "TokenAuthMiddleware."
-        )
-    token = scope["token"]
-    user = None
-    try:
-        auth = TokenAuthentication()
-        user = auth.authenticate(token)
-    except AuthenticationFailed:
-        pass
-    return user or AnonymousUser()
+from django.db import close_old_connections
 
 
 class TokenAuthMiddleware:
@@ -39,38 +19,42 @@ class TokenAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        # Look up user from query string
-        query_params = parse_qs(scope["query_string"].decode())
-        token = query_params["token"][0]
-        scope["token"] = token
-        scope["user"] = await get_user(scope)
+        headers = dict(scope['headers'])
+        if b'authorization' in headers:
+            try:
+                token_name, token_key = headers[b'authorization'].decode().split()
+                scope["token"] = token_key
+                scope["user"] = await self.get_user(scope)
+            except (KeyError, Token.DoesNotExist):
+                scope["user"] = AnonymousUser()
+        else:
+            scope["user"] = AnonymousUser()
+
+        try:
+            query_string = parse_qs(scope['query_string'].decode())
+            scope['query_string'] = dict(thread_name=query_string['thread_name'][0])
+        except Exception as e:
+            print(e)
         return await self.app(scope, receive, send)
 
-
-class TokenAuthentication:
-    """
-    Simple token based authentication.
-
-    Clients should authenticate by passing the token key in the query parameters.
-    For example:
-
-        ?token=401f7ac837da42b97f613d789819ff93537bee6a
-    """
-
-    model = None
-
-    @classmethod
-    def get_model(cls):
-        return cls.model if cls.model is not None else Token
-
-    @classmethod
-    def authenticate(cls, key):
-        model = cls.get_model()
+    @database_sync_to_async
+    def get_user(self, scope):
+        """
+        Return the user model instance associated with the given scope.
+        If no user is retrieved, return an instance of `AnonymousUser`.
+        """
+        if "token" not in scope:
+            raise ValueError(
+                "Cannot find token in scope. You should wrap your consumer in "
+                "TokenAuthMiddleware."
+            )
+        token = scope["token"]
+        user = None
         try:
-            token = model.objects.select_related("user").get(key=key)
-        except model.DoesNotExist:
+            user = Token.objects.get(key=token).user
+        except Token.DoesNotExist:
             raise AuthenticationFailed(_("Invalid token."))
-
-        if not token.user.is_active:
-            raise AuthenticationFailed(_("User inactive or deleted."))
-        return token.user
+        if user is None:
+            user = AnonymousUser()
+        close_old_connections()
+        return user

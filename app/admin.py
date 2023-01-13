@@ -4,7 +4,7 @@ from django.contrib import admin
 from app.Course.models import Course
 from app.Tutee.models import TuteeProfile
 from app.Tutor.models import TutorProfile
-from app.chat.models import Conversation
+from app.chat.models import ChatThread, ChatMessage
 from app.submodels import UserVerificationModel
 
 
@@ -28,7 +28,8 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Course._meta.fields]
 
 
-admin.site.register(Conversation)
+admin.site.register(ChatThread)
+admin.site.register(ChatMessage)
 admin.site.register(TutorProfile, TutorProfileAdmin)
 admin.site.register(TuteeProfile, TuteeProfileAdmin)
 admin.site.register(Course, CourseAdmin)

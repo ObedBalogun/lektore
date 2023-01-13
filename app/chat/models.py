@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class Conversation(models.Model):
+class ChatThread(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=128)
     online_users = models.ManyToManyField(User, blank=True)
@@ -23,15 +23,15 @@ class Conversation(models.Model):
         return f"{self.name} ({self.get_online_count()})"
 
 
-class Message(models.Model):
+class ChatMessage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    conversation = models.ForeignKey(
-        Conversation, on_delete=models.CASCADE, related_name="messages"
+    thread = models.ForeignKey(
+        ChatThread, on_delete=models.CASCADE, related_name="messages"
     )
-    from_user = models.ForeignKey(
+    sender = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="messages_from_me"
     )
-    to_user = models.ForeignKey(
+    receiver = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="messages_to_me"
     )
     content = models.CharField(max_length=512)
@@ -39,4 +39,4 @@ class Message(models.Model):
     read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"
+        return f"From {self.sender.username} to {self.receiver.username}: {self.content} [{self.timestamp}]"
