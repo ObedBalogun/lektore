@@ -49,7 +49,6 @@ LEKTORE_URL = "http://35.93.0.127:8000/"
 
 ASGI_APPLICATION = 'lektore.asgi.application'
 
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -106,6 +105,7 @@ DB_DETAILS = {
     'PASSWORD': DB_PASSWORD,
     'HOST': DB_HOST,
     'PORT': DB_PORT,
+    'OPTIONS': {'sslmode': 'require'},
 }
 
 DATABASES = {
