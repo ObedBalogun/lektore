@@ -80,7 +80,7 @@ class ChatConsumer(WebsocketConsumer):
                 self.thread_name,
                 {
                     "type": "broadcast_message",
-                    "name": self.user.username,
+                    # "name": self.user.username,
                     "message": ChatMessageSerializer(chat_message).data,
                 },
             )
@@ -90,7 +90,7 @@ class ChatConsumer(WebsocketConsumer):
                 notification_group_name,
                 {
                     "type": "new_message_notification",
-                    "name": self.user.username,
+                    # "name": self.user.username,
                     "message": ChatMessageSerializer(chat_message).data,
                 },
             )

@@ -1,6 +1,7 @@
 from app.Tutee.models import TuteeProfile
 from app.Tutor.models import TutorProfile
 
+from asgiref.sync import async_to_sync, sync_to_async
 
 class ChatService:
     @classmethod
@@ -23,6 +24,7 @@ class ChatService:
         return user, user_category_id
 
     @classmethod
+    @sync_to_async
     def get_chat_history(cls, thread):
         messages = thread.messages.all().order_by("-timestamp")[:50]
         message_count = thread.messages.all().count()
