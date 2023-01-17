@@ -64,7 +64,7 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
-        message_type = text_data_json['type']
+        message_type = text_data_json['event']
         receiver = ChatService.get_chat_receiver(self.thread_name, self.user)
 
         if message_type == "chat_message":

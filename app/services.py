@@ -19,6 +19,7 @@ import pyotp
 
 from app.utils.utils import EmailManager
 
+
 class UserService:
     @classmethod
     def create_user(cls, **kwargs) -> dict:
@@ -31,27 +32,26 @@ class UserService:
         nationality = kwargs.get("nationality")
         phone_number = kwargs.get("phone_number")
         try:
-            user_exists = User.objects.filter(username__iexact=email).exists()
-            if user_exists:
+            if user_exists := User.objects.filter(username__iexact=email).exists():
                 return dict(
                     error="User already exists",
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            else:
-                user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
-                                           password=password)
-                user.set_password(password)
-                user.save()
-                app_user = ""
-                if role == 'tutor':
-                    tutor_id = GenerateID.generate_id(TutorProfile, 5)
-                    app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
-                                                           nationality=nationality, gender=gender)
-                if role == 'tutee':
-                    tutee_id = GenerateID.generate_id(TuteeProfile, 5)
-                    app_user = TuteeProfile.objects.create(user=user)
-                return dict(data=model_to_dict(app_user, exclude=["nationality", "id"]),
-                            message=f"{role} with email, {email} successfully created")
+            user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
+                                       password=password)
+            user.set_password(password)
+            user.save()
+            app_user = ""
+            if role == 'tutor':
+                tutor_id = GenerateID.generate_id(TutorProfile, 5)
+                app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
+                                                       nationality=nationality, gender=gender)
+            if role == 'tutee':
+                tutee_id = GenerateID.generate_id(TuteeProfile, 5)
+                app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
+                                                       nationality=nationality, gender=gender)
+            return dict(data=model_to_dict(app_user, exclude=["nationality", "id"]),
+                        message=f"{role} with email, {email} successfully created")
 
         except Exception as e:
             print(e)
@@ -64,6 +64,7 @@ class UserService:
     def app_user_login(cls, request, **kwargs) -> dict:
         username = kwargs.get("username")
         password = kwargs.get("password")
+        user_id = None
         try:
             user = User.objects.get(username=username)
             _user = authenticate(username=username, password=password)
@@ -74,8 +75,20 @@ class UserService:
                 otp_is_verified = UserVerificationModel.objects.get(email=username).otp_is_verified
             except UserVerificationModel.DoesNotExist:
                 otp_is_verified = False
-            return dict(data={"token": _login.key, "email_is_verified": otp_is_verified},
-                        message=f"User {username} successfully logged in")
+            try:
+                user_id = TutorProfile.objects.get(user=user)
+                user_id = user_id.tutor_id
+            except TutorProfile.DoesNotExist:
+                user_id = TuteeProfile.objects.get(user=user)
+                user_id = user_id.tutee_id
+
+            return dict(
+                data={
+                    "token": _login.key,
+                    "email_is_verified": otp_is_verified,
+                    "profile_id": user_id
+                },
+                message=f"User {username} successfully logged in")
         except User.DoesNotExist:
             return dict(error=f"User with username {username} not found")
 
