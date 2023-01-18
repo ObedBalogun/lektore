@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 
 ]
 
-LEKTORE_URL = "http://35.93.0.127:8000/"
+LEKTORE_URL = "http://172.187.168.123:8000/"
 
 ASGI_APPLICATION = 'lektore.asgi.application'
 
