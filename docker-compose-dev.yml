@@ -13,7 +13,7 @@ services:
     command:
       bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     depends_on:
-      - lektore-redis
+      - lektore-redis-dev
     environment:
       - DB_NAME=${TEST_DB_NAME}
       - DB_USER=${TEST_DB_USER}
