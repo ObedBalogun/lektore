@@ -1,0 +1,29 @@
+version: '3'
+services:
+  lektore-app-dev:
+    build:
+      context: .
+      dockerfile: ./DockerFile
+    volumes:
+      - .:/lektore
+    ports:
+      - "8000:8001"
+    image: lektore-app:lektore
+    container_name: lektore-api
+    command:
+      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - lektore-redis
+    environment:
+      - DB_NAME=${TEST_DB_NAME}
+      - DB_USER=${TEST_DB_USER}
+      - DB_PASSWORD=${TEST_DB_PASSWORD}
+      - DB_HOST=${TEST_DB_HOST}
+      - DB_PORT=${TEST_DB_PORT}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - REDIS_HOST=${REDIS_HOST_DEV}
+      - REDIS_PORT=${REDIS_PORT}
+  lektore-redis-dev:
+    image: redis:alpine
+    container_name: lektore-redis
+
