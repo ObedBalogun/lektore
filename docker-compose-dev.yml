@@ -25,5 +25,5 @@ services:
       - REDIS_PORT=${REDIS_PORT}
   lektore-redis-dev:
     image: redis:alpine
-    container_name: lektore-redis
+    container_name: lektore-redis-dev
 
