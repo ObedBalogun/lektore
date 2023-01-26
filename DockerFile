@@ -11,5 +11,3 @@ COPY requirements.txt /lektore/requirements.txt
 COPY ./lektore /lektore
 
 RUN pip install -r /lektore/requirements.txt
-
-

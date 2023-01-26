@@ -19,6 +19,10 @@ import pyotp
 
 from app.utils.utils import EmailManager
 
+import os, uuid
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
+
 
 class UserService:
     @classmethod
@@ -31,6 +35,7 @@ class UserService:
         gender = kwargs.get("gender")
         nationality = kwargs.get("nationality")
         phone_number = kwargs.get("phone_number")
+        profile_picture = kwargs.get("profile_picture")
         try:
             if user_exists := User.objects.filter(username__iexact=email).exists():
                 return dict(
@@ -45,11 +50,14 @@ class UserService:
             if role == 'tutor':
                 tutor_id = GenerateID.generate_id(TutorProfile, 5)
                 app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
-                                                       nationality=nationality, gender=gender)
+                                                       nationality=nationality, gender=gender,
+                                                       profile_picture=profile_picture)
             if role == 'tutee':
                 tutee_id = GenerateID.generate_id(TuteeProfile, 5)
                 app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
-                                                       nationality=nationality, gender=gender)
+                                                       nationality=nationality, gender=gender,
+                                                       profile_picture=profile_picture)
+
             return dict(data=model_to_dict(app_user, exclude=["nationality", "id"]),
                         message=f"{role} with email, {email} successfully created")
 
@@ -189,3 +197,50 @@ class SearchBarService:
                     result_list.append(model_to_dict(_object, exclude=["id", "nationality"]))
                     break
         return result_list
+
+
+class AzureStorageService:
+    connect_str = config('AZURE_CONNECTION_STRING')
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+
+    @classmethod
+    def list_containers(cls):
+        return cls.blob_service_client.list_containers()
+
+    @classmethod
+    def create_container(cls, container_name, container_type):
+        container_name = container_name.lower()
+        if container_type == "pdf":
+            container_name = f"{container_name}-pdf"
+        elif container_type == "image":
+            container_name = f"{container_name}-images"
+        elif container_type == "video":
+            container_name = f"{container_name}-videos"
+        container_client = cls.blob_service_client.create_container(container_name)
+        return "Container created successfully"
+
+    @classmethod
+    def upload_file(cls, file, file_name, container_name, username):
+        blob_client = cls.blob_service_client.get_blob_client(container=container_name, blob=f'{username}/{file_name}')
+        content_settings = ContentSettings(content_type=file.content_type)
+        blob_client.upload_blob(file, content_settings=content_settings)
+        return blob_client.url
+
+    @classmethod
+    def download_file(cls, file_name, container_name, container_type):
+        container_name = container_name.lower()
+        blob_client = cls.blob_service_client.get_container_client(container=container_name)
+        return blob_client.download_blob(blob=file_name)
+
+    @classmethod
+    def delete_file(cls, file_name, container_name, container_type):
+        container_name = container_name.lower()
+        if container_type == "pdf":
+            container_name = f"{container_name}-pdf"
+        elif container_type == "image":
+            container_name = f"{container_name}-images"
+        elif container_type == "video":
+            container_name = f"{container_name}-videos"
+        blob_client = cls.blob_service_client.get_blob_client(container=container_name, blob=file_name)
+        blob_client.delete_blob()
+        return "File deleted successfully"

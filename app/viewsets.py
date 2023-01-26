@@ -3,7 +3,6 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 
 from app.services import OTPService
-from app.submodels import UserVerificationModel
 from app.utils.utils import ResponseManager
 
 

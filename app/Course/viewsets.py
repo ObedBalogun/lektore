@@ -1,11 +1,12 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 
-from app.Course.models import Course
+from decouple import config
 from rest_framework import status, serializers
 from app.Course.serializers import CourseSerializer
 from app.Course.services import CourseService
 from app.serializers import inline_serializer
+from app.services import AzureStorageService
 from app.utils.utils import ResponseManager
 
 
@@ -22,7 +23,23 @@ class CourseViewSets(viewsets.ViewSet):
                 message="Course was not created.",
                 status=status.HTTP_400_BAD_REQUEST
             )
-        response = CourseService.create_course(**serialized_data.data)
+        copy_data = serialized_data.data
+        if intro_video := serialized_data.validated_data['intro_video']:
+            video_extensions = config("VIDEO_EXTENSIONS").split(',')
+            file_name = intro_video.name
+            file_extension = file_name.split(".")[-1]
+            if file_extension.lower() not in video_extensions:
+                return ResponseManager.handle_response(
+                    errors=dict(error="Invalid file extension"),
+                    message="Course was not created.",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            container_name = config("AZURE_VIDEO_CONTAINER_NAME")
+            upload_file = AzureStorageService.upload_file(intro_video, file_name, container_name,
+                                                          copy_data['tutor_id'])
+            copy_data.update({"intro_video": str(upload_file)})
+
+        response = CourseService.create_course(**copy_data)
         return ResponseManager.handle_response(
             data=response.get("data"),
             message=response.get("message"),
