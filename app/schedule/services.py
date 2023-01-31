@@ -144,8 +144,9 @@ class ScheduleService:
             available_times = getattr(user_availability, day_of_week)
             for period in available_times:
                 availability_start_time, availability_end_time = period.split("-")
-                if int(schedule_start_time.replace(":", "")) <= int(availability_start_time.replace(":", "")) <= int(
+                if int(availability_start_time.replace(":", "")) <= int(schedule_start_time.replace(":", "")) <= int(
                         availability_end_time.replace(":", "")):
+                    print(availability_start_time, availability_end_time, schedule_start_time, schedule_end_time)
                     return int(schedule_end_time.replace(":", "")) <= int(
                         availability_end_time.replace(":", "")
                     )
