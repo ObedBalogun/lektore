@@ -146,7 +146,6 @@ class ScheduleService:
                 availability_start_time, availability_end_time = period.split("-")
                 if int(availability_start_time.replace(":", "")) <= int(schedule_start_time.replace(":", "")) <= int(
                         availability_end_time.replace(":", "")):
-                    print(availability_start_time, availability_end_time, schedule_start_time, schedule_end_time)
                     return int(schedule_end_time.replace(":", "")) <= int(
                         availability_end_time.replace(":", "")
                     )
