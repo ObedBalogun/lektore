@@ -1,7 +1,7 @@
-from app.Tutor.models import TutorProfile
+from app.tutor.models import TutorProfile
 from django.forms import model_to_dict
 
-from app.Tutor.serializers import TutorSerializer
+from app.tutor.serializers import TutorSerializer
 
 
 class TutorService:

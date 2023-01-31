@@ -30,7 +30,7 @@ class UserSerializer(serializers.Serializer):
     nationality = serializers.CharField(max_length=5)
     email = serializers.EmailField()
     role = serializers.CharField(max_length=50)
-    profile_picture = serializers.ImageField()
+    profile_picture = serializers.ImageField(required=False)
 
 
 class UserDetailsSerializer(serializers.Serializer):

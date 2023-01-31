@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from app.Tutor.views import TutorProfileView
+from app.tutor.views import TutorProfileView
 
 urlpatterns = [
     path('', TutorProfileView.as_view()),

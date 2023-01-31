@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from app.Tutor.services import TutorService
+from app.tutor.services import TutorService
 from app.utils.utils import ResponseManager
 import rest_framework.status as status
 

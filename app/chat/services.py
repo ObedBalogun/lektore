@@ -1,5 +1,5 @@
-from app.Tutee.models import TuteeProfile
-from app.Tutor.models import TutorProfile
+from app.tutee.models import TuteeProfile
+from app.tutor.models import TutorProfile
 
 
 class ChatService:

@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 
 from decouple import config
 from rest_framework import status, serializers
-from app.Course.serializers import CourseSerializer
-from app.Course.services import CourseService
+from app.course.serializers import CourseSerializer
+from app.course.services import CourseService
 from app.serializers import inline_serializer
 from app.services import AzureStorageService
 from app.utils.utils import ResponseManager

@@ -1,5 +1,5 @@
-from app.Course.models import Course, Module
-from app.Tutor.models import TutorProfile
+from app.course.models import Course, Module
+from app.tutor.models import TutorProfile
 from app.helpers import GenerateID
 from django.forms import model_to_dict
 

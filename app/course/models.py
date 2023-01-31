@@ -1,7 +1,7 @@
 from django.db import models
 
-from app.Tutor.models import TutorProfile
-from app.submodels import Timestamp
+from app.tutor.models import TutorProfile
+from app.shared_models import Timestamp
 
 
 class Course(Timestamp):

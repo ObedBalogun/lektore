@@ -3,7 +3,6 @@ from django_countries.fields import CountryField
 from app.commons import GENDER
 from django.contrib.auth.models import User
 
-
 USER_ROLES = (('tutor', 'Tutor'), ('student', 'Student'))
 
 

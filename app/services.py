@@ -7,10 +7,10 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.forms import model_to_dict
 
-from app.Course.models import Course, Module
-from app.Tutee.models import TuteeProfile
-from app.Tutor.models import TutorProfile
-from app.submodels import UserVerificationModel
+from app.course.models import Course, Module
+from app.tutee.models import TuteeProfile
+from app.tutor.models import TutorProfile
+from app.shared_models import UserVerificationModel
 
 from app.helpers import user_login, user_logout, generate_key, GenerateID
 from decouple import config
@@ -19,9 +19,7 @@ import pyotp
 
 from app.utils.utils import EmailManager
 
-import os, uuid
-from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
+from azure.storage.blob import BlobServiceClient, ContentSettings
 
 
 class UserService:
@@ -104,6 +102,11 @@ class UserService:
     def app_user_logout(cls, request):
         user_logout(request)
         return dict(message="User successfully logged out")
+
+    @classmethod
+    def forgot_password(cls, **kwargs) -> dict:
+        email = kwargs.get("email")
+        return {}
 
 
 class OTPService:

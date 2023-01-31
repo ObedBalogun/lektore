@@ -21,7 +21,7 @@ class UserRegistrationAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         copy_data = serialized_data.data
-        if profile_picture := serialized_data.validated_data['profile_picture']:
+        if profile_picture := serialized_data.validated_data.get('profile_picture', None):
             image_extensions = config("IMAGE_EXTENSIONS").split(',')
             file_name = profile_picture.name
             file_extension = file_name.split(".")[-1]

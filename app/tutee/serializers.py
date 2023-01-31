@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from app.Tutor.models import TutorProfile
+from app.tutor.models import TutorProfile
 
 
 class TutorDetails(serializers.ModelSerializer):

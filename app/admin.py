@@ -1,11 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from app.Course.models import Course
-from app.Tutee.models import TuteeProfile
-from app.Tutor.models import TutorProfile
+from app.course.models import Course
+from app.tutee.models import TuteeProfile
+from app.tutor.models import TutorProfile
 from app.chat.models import ChatThread, ChatMessage
-from app.submodels import UserVerificationModel
+from app.shared_models import UserVerificationModel
+from app.schedule.models import Schedule, Availability
 
 
 class TutorProfileAdmin(admin.ModelAdmin):
@@ -30,6 +31,8 @@ class CourseAdmin(admin.ModelAdmin):
 
 admin.site.register(ChatThread)
 admin.site.register(ChatMessage)
+admin.site.register(Schedule)
+admin.site.register(Availability)
 admin.site.register(TutorProfile, TutorProfileAdmin)
 admin.site.register(TuteeProfile, TuteeProfileAdmin)
 admin.site.register(Course, CourseAdmin)

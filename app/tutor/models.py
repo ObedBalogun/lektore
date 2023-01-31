@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from app.submodels import CommonUserDetails, Timestamp
+from app.shared_models import CommonUserDetails, Timestamp
 
 
 class TutorProfile(CommonUserDetails, Timestamp):

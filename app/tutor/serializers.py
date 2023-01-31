@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from app.Tutor.models import TutorProfile
+from app.tutor.models import TutorProfile
 from app.serializers import TutorUserSerializer
 
 

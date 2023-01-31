@@ -4,7 +4,7 @@ from django.db import models
 from django_countries.fields import CountryField
 
 from app.commons import EXPERIENCE, SERVICES
-from app.submodels import CommonUserDetails
+from app.shared_models import CommonUserDetails
 
 
 class TuteeProfile(CommonUserDetails):
