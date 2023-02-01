@@ -55,8 +55,22 @@ class ScheduleService:
     @classmethod
     def update_schedule(cls, **kwargs):
         schedule_id = kwargs.get("schedule_id")
+        start_time = kwargs.get("start_time")
+        end_time = kwargs.get("end_time")
+
         try:
             schedule = Schedule.objects.get(id=schedule_id)
+            user_availability = Availability.objects.get(user=schedule.user)
+
+            actual_start_date, string_start_date = cls.format_date(start_time) if start_time else cls.format_date(
+                schedule.start_time)
+            actual_end_date, string_end_date = cls.format_date(end_time) if end_time else cls.format_date(
+                schedule.end_time)
+
+            user_availability = cls.check_availability(user_availability, actual_start_date, actual_end_date)
+            if not user_availability:
+                return dict(error="Schedule could not be updated with specified time")
+
             for key, value in kwargs.items():
                 if key != "schedule_id":
                     setattr(schedule, key, value)
