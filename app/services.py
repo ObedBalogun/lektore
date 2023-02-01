@@ -77,7 +77,7 @@ class UserService:
             user = User.objects.get(username=username)
             _user = authenticate(username=username, password=password)
             if _user is None:
-                return dict(error=status.HTTP_401_UNAUTHORIZED)
+                return dict(error=status.HTTP_401_UNAUTHORIZED, message="Invalid credentials")
             _login: Type[Token] = user_login(request, user)
             try:
                 otp_is_verified = UserVerificationModel.objects.get(email=username).otp_is_verified
