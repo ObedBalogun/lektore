@@ -75,7 +75,7 @@ class UserLogout(generics.GenericAPIView):
         response = UserService.app_user_logout(request)
         return ResponseManager.handle_response(
             errors=response.get("error", None),
-            data=response.get("data", None),
+            message=response.get("message", None),
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
             else status.HTTP_204_NO_CONTENT,
