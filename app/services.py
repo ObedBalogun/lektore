@@ -50,13 +50,15 @@ class UserService:
                 app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
+                app_user = model_to_dict(app_user, exclude=["id", "nationality"])
             if role == 'tutee':
                 tutee_id = GenerateID.generate_id(TuteeProfile, 5)
                 app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
+                app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination"])
 
-            return dict(data=model_to_dict(app_user, exclude=["nationality", "id"]),
+            return dict(data=app_user,
                         message=f"{role} with email, {email} successfully created")
 
         except Exception as e:
