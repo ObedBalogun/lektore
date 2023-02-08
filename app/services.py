@@ -149,7 +149,7 @@ class OTPService:
         otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
 
         url = f"{lektore_url}/verify-email?email={authenticated_user.email}&otp={otp.now()}"
-        email_template_name = "email_template/email_verification.txt"
+        email_template_name = "email_template/email_verification.html"
         domain = request.META["HTTP_HOST"]
         site_name = "Lektore"
         data = {
