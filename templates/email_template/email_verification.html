@@ -1,0 +1,188 @@
+{% autoescape off %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Templates</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&family=Montserrat:wght@100;300;400;500;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <table
+      style="width: 100%; padding: 0 16px; max-width: 400px; margin: 0 auto"
+    >
+      <tr>
+        <td style="text-align: center">
+          <img
+            style="height: 71.64px; width: 71.64px; opacity: 0.3"
+            src="./lektore.svg"
+            alt=""
+          />
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: center; width: 100%">
+          <h1
+            style="
+              font-size: 25px;
+              color: #2e7dda;
+              text-align: center;
+              font-family: 'Montserrat', sans-serif;
+              text-transform: capitalize;
+              font-weight: 600;
+            "
+          >
+            Verify your email address
+          </h1>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h1
+            style="
+              font-family: Montserrat;
+              font-weight: 700;
+              font-size: 16px;
+              line-height: 22px;
+              text-align: justify;
+            "
+          >
+            Welcome to Lektore
+          </h1>
+          <p
+            style="
+              font-family: Montserrat;
+              font-weight: 500;
+              font-size: 14px;
+              line-height: 22px;
+              text-align: justify;
+            "
+          >
+            We are excited to have you join us. Please click the link below to
+            verify your email.
+          </p>
+          <a href="{{ url|safe }}" target="_blank" style="
+              font-family: Montserrat;
+              font-weight: 500;
+              font-size: 14px;
+              line-height: 22px;
+              margin-top: 16px;
+              text-align: justify;
+              text-decoration: underline;
+              cursor: pointer;
+              color: #2e7dda;
+            ">
+              {{ url|safe }}
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 100%; text-align: center; position: relative">
+          <p
+            style="
+              font-family: Montserrat;
+              font-weight: 500;
+              font-size: 14px;
+              line-height: 22px;
+              text-align: justify;
+            "
+          >
+            This link will expire in 5 days. If you did not make this request,
+            please disregard this email. For help, contact us through our
+            <a style="color: #2e7dda" href="#help-centre">Help center.</a>
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td
+          style="
+            margin-top: 64px;
+            display: block;
+            text-align: center;
+            width: 100%;
+            border-top: 1px solid #d9d9d9;
+            padding-top: 24px;
+          "
+        >
+          <div style="margin: 0 auto; vertical-align: center">
+            <a style="text-align: center" href="#instagram"
+              ><img
+                style="
+                  height: 42px;
+                  width: 42px;
+                  transform: translate(-6px, 8px);
+                "
+                src="./instagram-logo.png"
+                alt="instagram-logo"
+            /></a>
+            <a style="text-align: center" href="#twitter"
+              ><img
+                style="height: 28px; width: 28px"
+                src="./twitter-logo.png"
+                alt="twitter-logo"
+            /></a>
+            <a style="text-align: center" href="#facebook"
+              ><img
+                style="max-height: 52px; max-width: 52px"
+                src="./facebook-logo.png"
+                alt="facebook-logo"
+            /></a>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p
+            style="
+              font-family: Montserrat;
+              font-weight: 300;
+              text-align: center;
+              font-size: 14px;
+            "
+          >
+            This email was sent by
+            <a
+              style="
+                color: #2e7dda;
+
+                font-size: 14px;
+                font-weight: 300;
+              "
+              href="#lektore"
+              >Lektore</a
+            >.
+          </p>
+          <p
+            style="
+              font-family: Montserrat;
+              font-weight: 300;
+              text-align: center;
+              font-size: 14px;
+              margin: 8px 0;
+            "
+          >
+            &copy;2022. Lecktore learning. all rights reserved
+          </p>
+          <p
+            style="
+              font-family: Montserrat;
+              font-weight: 300;
+              text-align: center;
+              font-size: 14px;
+            "
+          >
+            8877 Manchester. United Kingdom
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+{% endautoescape %}
