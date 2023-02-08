@@ -148,7 +148,7 @@ class OTPService:
 
         otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
         host_machine = "http://localhost:3000" if env == "TEST" else "http://lektore.netlify.app"
-        url = f"{host_machine}/email-verification/email={authenticated_user.email}&otp={otp.now()}"
+        url = f"{host_machine}/email-verification/{authenticated_user.email}/{otp.now()}"
         email_template_name = "email_template/email_verification.html"
         domain = request.META["HTTP_HOST"] if request else "lektore.com"
         site_name = "Lektore"
