@@ -57,7 +57,7 @@ class UserService:
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
                 app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination"])
-
+            OTPService.request_otp(user=user)
             return dict(data=app_user,
                         message=f"{role} with email, {email} successfully created")
 
@@ -139,11 +139,11 @@ class OTPService:
             return otp.verify(user_otp)
 
     @classmethod
-    def request_otp(cls, request):
+    def request_otp(cls, request=None, user=None):
         env = config("ENV")
         lektore_url = config("LEKTORE_URL_PROD") if env == "PROD" else config("LEKTORE_URL_TEST")
 
-        authenticated_user = request.user
+        authenticated_user = request.user if user is None else user
         user_email = authenticated_user.email
 
         otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
