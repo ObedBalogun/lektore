@@ -62,7 +62,7 @@ class UserService:
                         message=f"{role} with email, {email} successfully created")
 
         except Exception as e:
-            print(e)
+            print(e, "error")
             return dict(
                 error="User already exists",
                 status=status.HTTP_400_BAD_REQUEST
@@ -150,7 +150,7 @@ class OTPService:
 
         url = f"{lektore_url}/verify-email?email={authenticated_user.email}&otp={otp.now()}"
         email_template_name = "email_template/email_verification.html"
-        domain = request.META["HTTP_HOST"]
+        domain = request.META["HTTP_HOST"] if request else "lektore.com"
         site_name = "Lektore"
         data = {
             "email": user_email,
