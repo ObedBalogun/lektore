@@ -7,7 +7,7 @@ from app.utils.utils import ResponseManager
 
 
 class OTPViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=False, methods=["get"], url_path="request")
     def request_otp(self, request):
@@ -20,7 +20,7 @@ class OTPViewSet(viewsets.ViewSet):
             else status.HTTP_200_OK
         )
 
-    @action(detail=False, methods=["get"], url_path="verify-email")
+    @action(detail=True, methods=["get"], url_path="verify-email")
     def verify_otp(self, request):
         response = OTPService.verify_email_otp(request)
         return ResponseManager.handle_response(
