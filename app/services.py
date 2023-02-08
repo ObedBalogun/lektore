@@ -24,7 +24,7 @@ from azure.storage.blob import BlobServiceClient, ContentSettings
 
 class UserService:
     @classmethod
-    def create_user(cls, **kwargs) -> dict:
+    def create_user(cls,request, **kwargs) -> dict:
         first_name = kwargs.get("first_name")
         last_name = kwargs.get("last_name")
         email = kwargs.get("email").lower()
@@ -57,7 +57,7 @@ class UserService:
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
                 app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination"])
-            OTPService.request_otp(user=user)
+            OTPService.request_otp(request=request,user=user)
             return dict(data=app_user,
                         message=f"{role} with email, {email} successfully created")
 

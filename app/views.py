@@ -36,7 +36,7 @@ class UserRegistrationAPIView(APIView):
                                                           copy_data['first_name'])
             copy_data.update({"profile_picture": str(upload_file)})
 
-        response = UserService.create_user(**copy_data)
+        response = UserService.create_user(request, **copy_data)
 
         return ResponseManager.handle_response(
             data=response.get("data"),
