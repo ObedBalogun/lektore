@@ -26,4 +26,12 @@ services:
   lektore-redis:
     image: redis:alpine
     container_name: lektore-redis
-
+  nginx:
+    image: nginx:alpine
+    container_name: lektore-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - .:/lektore
+    depends_on:
+      - lektore-app
