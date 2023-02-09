@@ -145,7 +145,7 @@ class OTPService:
 
         # authenticated_user = request.user if user is None else user
         # user_email = authenticated_user.email
-        user_email = request.GET.get("email")
+        user_email = request.GET.get("email") or user.email
         authenticated_user = User.objects.get(email=user_email)
         otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
         host_machine = "http://localhost:3000" if env == "TEST" else "http://lektore.netlify.app"
