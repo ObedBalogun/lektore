@@ -64,7 +64,7 @@ class UserService:
         except Exception as e:
             print(e, "error")
             return dict(
-                error="User already exists",
+                error=f"{e}",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
