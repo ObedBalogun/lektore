@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 from app.tutor.models import TutorProfile
 from app.shared_models import Timestamp
 
@@ -18,6 +18,7 @@ class Course(Timestamp):
     course_description = models.TextField()
     course_goal = models.TextField()
     intro_video = models.URLField(verbose_name="Link to video")
+    is_active = models.BooleanField(default=True)
 
 
 class Module(Timestamp):
@@ -27,3 +28,9 @@ class Module(Timestamp):
     module_duration = models.FloatField(default=0)
     module_video = models.URLField(verbose_name="Link to module video")
     module_pdf = models.URLField(verbose_name="Link to module pdf")
+
+
+class CourseOrder(Timestamp):
+    course = models.ForeignKey(Course, on_delete=models.PROTECT)
+    tutee = models.ForeignKey(User, on_delete=models.PROTECT)
+    status = models.BooleanField(default=False)

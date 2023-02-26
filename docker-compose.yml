@@ -10,11 +10,12 @@ services:
       - "8000:8000"
     image: lektore-app:lektore
     container_name: lektore-api
-    command:
-      bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+#    command:
+#      sh -c "python manage.py collectstatic --no-input &&ls&& gunicorn lektore.wsgi:application --bind 0.0.0.0:8000"
     depends_on:
       - lektore-redis
     environment:
+      - DJANGO_SETTINGS_MODULE=lektore.settings
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -30,8 +31,35 @@ services:
     image: nginx:alpine
     container_name: lektore-nginx
     ports:
-      - "80:80"
+      - "1337:80"
     volumes:
-      - .:/lektore
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/lektore/static
     depends_on:
       - lektore-app
+##volumes:
+##  static:
+
+#version: '3'
+
+#services:
+#  lektore-app:
+#    build:
+#        context: .
+#        dockerfile: ./DockerFile
+#
+#    command: python manage.py runserver 0.0.0.0:8000
+#    volumes:
+#      - .:/code
+#    ports:
+#      - "8000:8000"
+#  nginx:
+#    image: nginx:latest
+#    volumes:
+#      - ./nginx.conf:/etc/nginx/nginx.conf
+#      - ./static:/code/static
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - lektore-app
+#

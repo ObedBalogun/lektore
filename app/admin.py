@@ -7,6 +7,7 @@ from app.tutor.models import TutorProfile
 from app.chat.models import ChatThread, ChatMessage
 from app.shared_models import UserVerificationModel
 from app.schedule.models import Schedule, Availability
+from app.wallet.models import Wallet, WalletTransaction
 
 
 class TutorProfileAdmin(admin.ModelAdmin):
@@ -29,11 +30,19 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Course._meta.fields]
 
 
+class WalletTransactionAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in WalletTransaction._meta.fields]
+    search_fields = ("created", "updated", "amount", "wallet__user__username")
+    list_filter = ("created", "updated",)
+
+
 admin.site.register(ChatThread)
 admin.site.register(ChatMessage)
 admin.site.register(Schedule)
 admin.site.register(Availability)
+admin.site.register(Wallet)
+admin.site.register(Course, CourseAdmin)
 admin.site.register(TutorProfile, TutorProfileAdmin)
 admin.site.register(TuteeProfile, TuteeProfileAdmin)
-admin.site.register(Course, CourseAdmin)
 admin.site.register(UserVerificationModel, UserVerificationAdmin)
+admin.site.register(WalletTransaction, WalletTransactionAdmin)

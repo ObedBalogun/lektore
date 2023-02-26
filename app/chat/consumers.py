@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
 from asgiref.sync import async_to_sync
+from urllib.parse import parse_qs
 
 from app.chat.models import ChatThread, ChatMessage
 from app.chat.serializers import ChatMessageSerializer
@@ -21,6 +22,11 @@ class ChatConsumer(WebsocketConsumer):
             return
         # initiate handshake
         self.accept()
+        try:
+            query_string = parse_qs(self.scope['query_string'].decode())
+            self.scope['query_string'] = dict(thread_name=query_string['thread_name'][0])
+        except Exception as e:
+            print(e)
 
         # Get or create chat thread
         self.thread_name = f"{self.scope['query_string']['thread_name']}"

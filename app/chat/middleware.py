@@ -1,4 +1,3 @@
-from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 
@@ -22,19 +21,13 @@ class TokenAuthMiddleware:
         headers = dict(scope['headers'])
         if b'authorization' in headers:
             try:
-                token_name, token_key = headers[b'authorization'].decode().split()
+                token_key = headers[b'authorization'].decode().split()[0]
                 scope["token"] = token_key
                 scope["user"] = await self.get_user(scope)
             except (KeyError, Token.DoesNotExist):
                 scope["user"] = AnonymousUser()
         else:
             scope["user"] = AnonymousUser()
-
-        try:
-            query_string = parse_qs(scope['query_string'].decode())
-            scope['query_string'] = dict(thread_name=query_string['thread_name'][0])
-        except Exception as e:
-            print(e)
         return await self.app(scope, receive, send)
 
     @database_sync_to_async
