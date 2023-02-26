@@ -13,3 +13,4 @@ SERVICES = (
 USER_CATEGORY = (("tutor", "Tutor"), ("tutee", "Tutee"))
 TRANSACTION_TYPE = (("credit", "Credit"), ("debit", "Debit"), ("refund", "Refund"))
 TRANSACTION_CATEGORY = (("course_order", "Course Order"), ("deposit", "Deposit"))
+EDUCATIONAL_QUALIFICATIONS = (("PhD", "Doctor of Philosophy"), ("MD", "Doctor of Medicine"), ("JD", "Juris Doctor"), ("MBA", "Master of Business Administration"), ("MFA", "Master of Fine Arts"), ("MA", "Master of Arts"), ("MSc", "Master of Science"), ("MEd", "Master of Education"), ("LLB", "Bachelor of Laws"), ("BA", "Bachelor of Arts"), ("BSc", "Bachelor of Science"), ("BEd", "Bachelor of Education"), ("BSN", "Bachelor of Science in Nursing"), ("BFA", "Bachelor of Fine Arts"), ("BBA", "Bachelor of Business Administration"), ("AA", "Associate of Arts"), ("AS", "Associate of Science"), ("AAS", "Associate of Applied Science"), ("Certificate", "Certificate"))

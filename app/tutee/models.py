@@ -9,7 +9,7 @@ from app.shared_models import CommonUserDetails
 
 class TuteeProfile(CommonUserDetails):
     tutee_id = models.CharField(max_length=10, unique=True)
-    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="tutee_profile")
     experience_level = models.CharField(max_length=100, choices=EXPERIENCE, blank=True, null=True)
     service = ArrayField(models.CharField(max_length=100, choices=SERVICES), blank=True,
                          null=True, default=list)

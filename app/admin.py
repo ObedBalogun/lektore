@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 from app.course.models import Course
 from app.tutee.models import TuteeProfile
-from app.tutor.models import TutorProfile
+from app.tutor.models import TutorProfile, EducationalQualification
 from app.chat.models import ChatThread, ChatMessage
 from app.shared_models import UserVerificationModel
 from app.schedule.models import Schedule, Availability
@@ -41,6 +41,7 @@ admin.site.register(ChatMessage)
 admin.site.register(Schedule)
 admin.site.register(Availability)
 admin.site.register(Wallet)
+admin.site.register(EducationalQualification)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(TutorProfile, TutorProfileAdmin)
 admin.site.register(TuteeProfile, TuteeProfileAdmin)

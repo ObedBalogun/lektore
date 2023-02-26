@@ -27,6 +27,7 @@ class UserService:
     def create_user(cls, request, **kwargs) -> dict:
         first_name = kwargs.get("first_name")
         last_name = kwargs.get("last_name")
+        username = kwargs.get("username").lower()
         email = kwargs.get("email").lower()
         password = kwargs.get("password")
         role = kwargs.get("role")
@@ -35,12 +36,12 @@ class UserService:
         phone_number = kwargs.get("phone_number")
         profile_picture = kwargs.get("profile_picture")
         try:
-            if user_exists := User.objects.filter(username__iexact=email).exists():
+            if user_exists := User.objects.filter(username=username).exists():
                 return dict(
                     error="User already exists",
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
+            user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=username,
                                        password=password)
             user.set_password(password)
             user.save()
@@ -67,6 +68,38 @@ class UserService:
                 error=f"{e}",
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @classmethod
+    def update_user(cls, **kwargs):
+        username = kwargs.get("username")
+        role = kwargs.get("role")
+        user = None
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return dict(
+                error="User does not exist",
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if role == 'tutor':
+            tutor_profile = user.tutor_profile
+
+            for key, value in kwargs.items():
+                if key != "username" and key != "role":
+                    setattr(tutor_profile, key, value)
+            tutor_profile.save()
+        if role == 'tutee':
+            tutee_profile = user.tutee_profile
+
+            for key, value in kwargs.items():
+                if key != "username" and key != "role":
+                    setattr(tutee_profile, key, value)
+            tutee_profile.save()
+        return dict(
+            message=f"{role} with username, {username} successfully updated",
+        )
 
     @classmethod
     def app_user_login(cls, request, **kwargs) -> dict:
