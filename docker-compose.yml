@@ -6,8 +6,8 @@ services:
       dockerfile: ./DockerFile
     volumes:
       - .:/lektore
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     image: lektore-app:lektore
     container_name: lektore-api
 #    command:
