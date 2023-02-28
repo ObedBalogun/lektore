@@ -36,4 +36,5 @@ class UserSerializer(serializers.Serializer):
 
 class UserDetailsSerializer(serializers.Serializer):
     password = serializers.CharField(style={"input_type": "password"}, required=True)
-    username = serializers.EmailField()
+    username = serializers.CharField(max_length=50)
+    email = serializers.EmailField(required=False)

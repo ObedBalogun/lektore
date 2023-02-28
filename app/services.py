@@ -113,7 +113,7 @@ class UserService:
                 return dict(error=status.HTTP_401_UNAUTHORIZED, message="Invalid credentials")
             _login: Type[Token] = user_login(request, user)
             try:
-                otp_is_verified = UserVerificationModel.objects.get(email=username).otp_is_verified
+                otp_is_verified = UserVerificationModel.objects.get(email=user.email).otp_is_verified
             except UserVerificationModel.DoesNotExist:
                 otp_is_verified = False
             try:
@@ -127,7 +127,7 @@ class UserService:
                     "email_is_verified": otp_is_verified,
                     "profile_id": user_id,
                     "role": "tutor" if user.tutor_profile else "tutee",
-                    "is_qualified": user.is_qualified,
+                    "is_qualified": user.tutor_profile.is_qualified,
                 },
                 message=f"User {username} successfully logged in")
         except User.DoesNotExist:
