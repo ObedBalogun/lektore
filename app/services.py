@@ -97,9 +97,9 @@ class UserService:
                 if key != "username" and key != "role":
                     setattr(tutee_profile, key, value)
             tutee_profile.save()
-        return dict(
-            message=f"{role} with username, {username} successfully updated",
-        )
+        return dict(data=model_to_dict(user, exclude=["id", "password"]),
+                    message=f"{role} with username, {username} successfully updated",
+                    )
 
     @classmethod
     def app_user_login(cls, request, **kwargs) -> dict:

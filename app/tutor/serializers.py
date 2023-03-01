@@ -13,7 +13,9 @@ class TutorSerializer(serializers.ModelSerializer):
 
 
 class EducationSerializer(serializers.ModelSerializer):
+    resume = serializers.FileField(required=False)
     intro_video = serializers.FileField(required=False)
+    certification_list = serializers.JSONField(required=False)
 
     class Meta:
         model = EducationalQualification

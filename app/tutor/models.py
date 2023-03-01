@@ -28,6 +28,8 @@ class EducationalQualification(Timestamp):
     aspirations = models.TextField(blank=True, null=True)
     remote_teaching = models.BooleanField(default=False)
     intro_video = models.CharField(max_length=255, blank=True, null=True)
+    tutor_resume = models.CharField(max_length=255, blank=True, null=True)
+    certification_list = models.JSONField(blank=True, null=True)
 
 
     def __str__(self):

@@ -28,7 +28,7 @@ class EducationService:
         kwargs.pop("tutor")
         try:
             if education := EducationalQualification.objects.get(tutor=tutor_profile):
-                return dict(error="Education already exists for user")
+                return dict(error="Qualification already exists for user")
         except EducationalQualification.DoesNotExist:
             education = EducationalQualification.objects.create(
                 tutor=tutor_profile,
@@ -36,3 +36,30 @@ class EducationService:
             )
             return dict(message="Education created successfully",
                         data=model_to_dict(education, exclude=["id"]))
+
+    @classmethod
+    def update_education(cls, **kwargs):
+        tutor_profile = TutorProfile.objects.get(id=kwargs.get("tutor"))
+        kwargs.pop("tutor")
+        try:
+            if education := EducationalQualification.objects.get(tutor=tutor_profile):
+                education = EducationalQualification.objects.update(
+                    tutor=tutor_profile,
+                    **kwargs
+                )
+                return dict(message="Education updated successfully",
+                            data=model_to_dict(education, exclude=["id"]))
+        except EducationalQualification.DoesNotExist:
+            return dict(error="Qualification does not exist for user")
+
+    @classmethod
+    def upload_resume(cls, tutor, resume_url, certification_list):
+        try:
+            if education := EducationalQualification.objects.get(tutor=tutor):
+                education.resume = resume_url
+                education.certification_list = certification_list
+                education.save()
+                return dict(message="Resume uploaded successfully",
+                            data=model_to_dict(education, exclude=["id"]))
+        except EducationalQualification.DoesNotExist:
+            return dict(error="Qualification does not exist for user")

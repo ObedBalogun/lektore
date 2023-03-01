@@ -88,6 +88,7 @@ class UserViewSet(viewsets.ViewSet):
 
         response = UserService.update_user(**serialized_data.data)
         return ResponseManager.handle_response(
+            data=response.get("data"),
             errors=response.get("error", None),
             message=response.get("message", None),
             status=status.HTTP_400_BAD_REQUEST
@@ -102,7 +103,6 @@ class UserViewSet(viewsets.ViewSet):
             return ResponseManager.handle_response(
                 errors=serialized_data.errors,
                 message="Incorrect user credentials", status=status.HTTP_400_BAD_REQUEST)
-
         response = UserService.app_user_login(self.request, **serialized_data.data)
 
         return ResponseManager.handle_response(
