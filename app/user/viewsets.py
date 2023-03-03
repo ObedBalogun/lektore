@@ -57,6 +57,8 @@ class UserViewSet(viewsets.ViewSet):
                 "last_name": serializers.CharField(required=False),
                 "email": serializers.EmailField(required=False),
                 "phone_number": serializers.CharField(required=False),
+                "postal_code": serializers.CharField(required=False),
+                "address": serializers.CharField(required=False),
                 "profile_picture": serializers.ImageField(required=False),
                 "nationality": serializers.CharField(required=False),
                 "username": serializers.CharField(required=False),

@@ -17,6 +17,7 @@ class Timestamp(models.Model):
 class CommonUserDetails(models.Model):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     postal_code = models.CharField(max_length=15, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
     nationality = CountryField(blank=True)
     gender = models.CharField(max_length=15, choices=GENDER, blank=True, null=True)
     profile_picture = models.CharField(max_length=255, blank=True, null=True)
