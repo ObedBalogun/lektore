@@ -105,7 +105,7 @@ class UserService:
     def app_user_login(cls, request, **kwargs) -> dict:
         username = kwargs.get("username")
         password = kwargs.get("password")
-        user_id, role = None, None
+        user_id, role, is_qualified = None, None, False
         try:
             user = User.objects.get(username=username)
             _user = authenticate(username=username, password=password)
@@ -118,6 +118,7 @@ class UserService:
                 otp_is_verified = False
             try:
                 user_id = user.tutor_profile.tutor_id
+                is_qualified = bool(user.tutor_profile.educational_qualifications)
             except TutorProfile.DoesNotExist:
                 user_id = user.tutee_profile.tutee_id
 
@@ -127,7 +128,7 @@ class UserService:
                     "email_is_verified": otp_is_verified,
                     "profile_id": user_id,
                     "role": "tutor" if user.tutor_profile else "tutee",
-                    "is_qualified": user.tutor_profile.is_qualified,
+                    "is_qualified": is_qualified,
                 },
                 message=f"User {username} successfully logged in")
         except User.DoesNotExist:
