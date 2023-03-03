@@ -103,12 +103,12 @@ class UserService:
 
     @classmethod
     def app_user_login(cls, request, **kwargs) -> dict:
-        username = kwargs.get("username")
+        username = kwargs.get("username").lower()
         password = kwargs.get("password")
         user_id, role = None, None
         try:
-            user = User.objects.get(username=username)
-            _user = authenticate(username=username, password=password)
+            user = User.objects.get(username=username) if "@" not in username else User.objects.get(email=username)
+            _user = authenticate(username=user.username, password=password)
             if _user is None:
                 return dict(error=status.HTTP_401_UNAUTHORIZED, message="Invalid credentials")
             _login: Type[Token] = user_login(request, user)
