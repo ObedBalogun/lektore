@@ -104,6 +104,7 @@ class ScheduleViewSet(viewsets.ViewSet):
 
 
 class AvailabilityViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     @action(detail=False, methods=["post"], url_path="create-availability")
     def create_availability(self, request):
         request_data = request.data

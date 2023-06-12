@@ -25,12 +25,11 @@ class EducationalQualification(Timestamp):
     teaching_experience = models.TextField(blank=True, null=True)
     subjects_taught = models.TextField(blank=True, null=True)
     qualified = models.BooleanField(default=False)
-    aspirations = models.TextField(blank=True, null=True)
+    pending_qualifications = models.CharField(max_length=255, blank=True, null=True, default="", verbose_name="Pending Qualifications")
     remote_teaching = models.BooleanField(default=False)
     intro_video = models.CharField(max_length=255, blank=True, null=True)
     tutor_resume = models.CharField(max_length=255, blank=True, null=True)
     certification_list = models.JSONField(blank=True, null=True)
-
 
     def __str__(self):
         return self.tutor.user.username

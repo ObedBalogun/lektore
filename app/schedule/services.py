@@ -23,17 +23,20 @@ class ScheduleService:
                 user_availability = Availability.objects.get(user=user)
                 user_availability = cls.check_availability(user_availability, actual_start_date, actual_end_date)
                 if user_availability:
-                    schedule = Schedule.objects.create(
-                        user=user,
-                        title=title,
-                        start_time=actual_start_date,
-                        end_time=actual_end_date,
-                        description=description,
-                        schedule_type=schedule_type
-                    )
-                    return dict(
-                        message=f"Schedule for {string_start_date.split(',')[0]} at {string_start_date.split(',')[1]} "
-                                "created successfully")
+                    if actual_end_date > actual_start_date:
+                        schedule = Schedule.objects.create(
+                            user=user,
+                            title=title,
+                            start_time=actual_start_date,
+                            end_time=actual_end_date,
+                            description=description,
+                            schedule_type=schedule_type
+                        )
+                        return dict(
+                            message=f"Schedule for {string_start_date.split(',')[0]} at {string_start_date.split(',')[1]} "
+                                    "created successfully")
+                    else:
+                        return dict(error="End time must be greater than start time")
                 else:
                     return dict(error="Selected time is not available")
             except Availability.DoesNotExist:
@@ -106,6 +109,7 @@ class ScheduleService:
 
     @classmethod
     def get_availability(cls, request):
+        print(request.user)
         user = get_user_model().objects.get(id=request.user.id)
         try:
             if availability := Availability.objects.get(user=user):
@@ -129,7 +133,7 @@ class ScheduleService:
     @staticmethod
     def format_date(date):
         actual_format = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%fZ")
-        string_format = actual_format.strftime("%d %B %Y,%H:%m")
+        string_format = actual_format.strftime("%d %B %Y,%H:%M")
         return actual_format, string_format
 
     @staticmethod
@@ -160,8 +164,12 @@ class ScheduleService:
                 availability_start_time, availability_end_time = period.split("-")
                 if int(availability_start_time.replace(":", "")) <= int(schedule_start_time.replace(":", "")) <= int(
                         availability_end_time.replace(":", "")):
-                    return int(schedule_end_time.replace(":", "")) <= int(
-                        availability_end_time.replace(":", "")
-                    )
+                    if int(schedule_end_time.replace(":", "")) <= int(
+                        availability_end_time.replace(":", "")):
+                        # check if schedule exists for that day/time
+                        if not Schedule.objects.filter(
+                            user= user_availability.user,
+                            end_time__lte=string_start_date).exists():
+                            return True
             return False
         return False
