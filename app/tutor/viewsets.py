@@ -147,3 +147,6 @@ class TutorViewset(viewsets.ViewSet):
             if response.get("error", None)
             else status.HTTP_200_OK,
         )
+    @action(detail=False, methods=["get"], url_path="tutor-dashboard")
+    def dashboard(self, request):
+        response = EducationService.dashboard(request.user)

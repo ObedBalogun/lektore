@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 from django.core.mail import EmailMessage
-from typing import Dict
+from typing import Dict, Union, List
 from rest_framework.response import Response
 import threading
 from rest_framework.pagination import PageNumberPagination
@@ -26,7 +26,7 @@ class CustomPagination(PageNumberPagination):
                     ("count", self.page.paginator.count),
                     ("next", self.get_next_link()),
                     ("previous", self.get_previous_link()),
-                    ("results", data),
+                    ("results", data if isinstance(data[0], dict) else dict(data)),
                 ]
             )
         )
@@ -37,10 +37,10 @@ class ResponseManager:
 
     @staticmethod
     def handle_response(
-            data: Dict = None, errors: Dict = None, status: int = 200, message: str = ""
+        data: Union[Dict, List] = None, errors: Dict = None, status: int = 200, message: str = ""
     ) -> Response:
         if data is None:
-            data = {}
+            data = []
         if errors is None:
             errors = {}
         if errors:
@@ -49,7 +49,7 @@ class ResponseManager:
 
     @staticmethod
     def handle_paginated_response(
-            paginator_instance: PageNumberPagination = PageNumberPagination(), data=None
+        paginator_instance: PageNumberPagination = PageNumberPagination(), data=None
     ) -> Response:
         if data is None:
             data = {}
@@ -57,7 +57,7 @@ class ResponseManager:
 
     @staticmethod
     def handle_dict_paginated_response(
-            paginator_instance: PageNumberPagination = PageNumberPagination(), data=None
+        paginator_instance: PageNumberPagination = PageNumberPagination(), data=None
     ) -> Response:
         if data is None:
             data = {}
@@ -65,7 +65,7 @@ class ResponseManager:
 
     @staticmethod
     def paginate_response(
-            queryset, request, serializer_=None, page_size=10, paginator=CustomPagination
+        queryset, request, serializer_=None, page_size=10, paginator=CustomPagination
     ):
         paginator_instance = paginator()
         paginator_instance.page_size = page_size
@@ -83,12 +83,11 @@ class ResponseManager:
 
     @staticmethod
     def paginate_dict_response(
-            result, request, page_size=10, paginator=CustomPagination
+        result, request, page_size=10, paginator=CustomPagination
     ):
-        if not result:
-            return {}
         paginator_instance = paginator()
         queryset = tuple(result.items())
+        print(queryset, "queryset_dict")
         paginator_instance.page_size = page_size
         return ResponseManager.handle_dict_paginated_response(
             paginator_instance, paginator_instance.paginate_queryset(queryset, request)
@@ -96,15 +95,15 @@ class ResponseManager:
 
     @staticmethod
     def paginate_list_response(
-            result, request, page_size=10, paginator=CustomPagination
+        result, request, page_size=10, paginator=CustomPagination
     ):
         paginator_instance = paginator()
-        queryset = result or []
+        queryset = result
+        print(queryset, "queryset_list")
         paginator_instance.page_size = page_size
         return ResponseManager.handle_dict_paginated_response(
             paginator_instance, paginator_instance.paginate_queryset(queryset, request)
         )
-
 
 class EmailThread(threading.Thread):
 

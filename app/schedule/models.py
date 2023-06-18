@@ -4,7 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class Schedule(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_schedule")
     title = models.CharField(max_length=100)
     start_time = models.DateTimeField(auto_now=False, auto_now_add=False)
     end_time = models.DateTimeField(auto_now=False, auto_now_add=False)
