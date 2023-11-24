@@ -87,7 +87,6 @@ class ResponseManager:
     ):
         paginator_instance = paginator()
         queryset = tuple(result.items())
-        print(queryset, "queryset_dict")
         paginator_instance.page_size = page_size
         return ResponseManager.handle_dict_paginated_response(
             paginator_instance, paginator_instance.paginate_queryset(queryset, request)
@@ -99,7 +98,6 @@ class ResponseManager:
     ):
         paginator_instance = paginator()
         queryset = result
-        print(queryset, "queryset_list")
         paginator_instance.page_size = page_size
         return ResponseManager.handle_dict_paginated_response(
             paginator_instance, paginator_instance.paginate_queryset(queryset, request)

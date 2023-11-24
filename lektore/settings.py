@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
     'rest_framework.authtoken',
     'django_filters',
     'app.apps.AppConfig',
@@ -97,11 +99,11 @@ WSGI_APPLICATION = 'lektore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DB_NAME = config('DB_NAME')
-DB_USER = config('DB_USER')
-DB_HOST = config('DB_HOST')
-DB_PORT = config('DB_PORT')
-DB_PASSWORD = config('DB_PASSWORD')
+DB_NAME = config('LOCAL_DB_NAME')
+DB_USER = config('LOCAL_DB_USER')
+DB_HOST = config('LOCAL_DB_HOST')
+DB_PORT = config('LOCAL_DB_PORT')
+DB_PASSWORD = config('LOCAL_DB_PASSWORD')
 
 DB_DETAILS = {
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -110,7 +112,7 @@ DB_DETAILS = {
     'PASSWORD': DB_PASSWORD,
     'HOST': DB_HOST,
     'PORT': DB_PORT,
-    'OPTIONS': {'sslmode': 'require'},
+    # 'OPTIONS': {'sslmode': 'require'},
 }
 
 DATABASES = {
@@ -157,10 +159,19 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 50
+}
+
+SIMPLE_JWT = {
+    # Overriding the access token lifetime from the default 5 minutes to 1hr 30 min
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1, minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
 
 AUTH_PASSWORD_VALIDATORS = [

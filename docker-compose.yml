@@ -16,11 +16,11 @@ services:
       - lektore-redis
     environment:
       - DJANGO_SETTINGS_MODULE=lektore.settings
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+      - DB_NAME=${LOCAL_DB_NAME}
+      - DB_USER=${LOCAL_DB_USER}
+      - DB_PASSWORD=${LOCAL_DB_PASSWORD}
+      - DB_HOST=${LOCAL_DB_HOST}
+      - DB_PORT=${LOCAL_DB_PORT}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
