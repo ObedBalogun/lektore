@@ -172,6 +172,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
+    "TOKEN_OBTAIN_SERIALIZER": "app.serializers.CustomTokenObtainPairSerializer",
 }
 
 AUTH_PASSWORD_VALIDATORS = [

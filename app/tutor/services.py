@@ -15,13 +15,15 @@ class TutorService:
         tutor_id = kwargs.get("tutor_id")
         if not tutor_id:
             tutors = TutorProfile.objects.all()
-            serialized_data = TutorSerializer(tutors, many=True)
+            serialized_data = TutorSerializer(data=tutors, many=True)
+            if not serialized_data.is_valid():
+                pass
             return dict(message="All tutors retrieved successfully",
                         data=serialized_data.data)
         try:
             tutor = TutorProfile.objects.get(tutor_id=tutor_id)
             serialized_data = TutorSerializer(tutor)
-            return dict(data=serialized_data.data)
+            return dict(data=serialized_data.data, message="Tutor retrieved successfully")
         except TutorProfile.DoesNotExist:
             return dict(error="Tutor does not exist")
 

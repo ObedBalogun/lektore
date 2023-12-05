@@ -18,17 +18,19 @@ class CourseService:
             return dict(message=f"{tutor.user.first_name}'s course, {course.course_name}, created successfully",
                         data=model_to_dict(course, exclude=["id"]))
         except TutorProfile.DoesNotExist:
-            return dict(error="Error creating course")
+            return dict(error=f"Tutor with ud {tutor_id} does not exist for this course")
+        except Exception as e:
+            return dict(error=f"Error {e}")
 
     @classmethod
-    def get_course(cls, course_id=None):
-        if not course_id:
+    def get_course(cls, **kwargs):
+        if not kwargs:
             courses = Course.objects.all()
             return dict(message="All courses retrieved successfully",
                         data=[model_to_dict(course, exclude=["id"]) for course in courses])
         try:
-            course = Course.objects.get(course_id=course_id)
-            return dict(data=model_to_dict(course, exclude=["id"]))
+            courses = Course.objects.filter(**kwargs)
+            return dict(data=[model_to_dict(course, exclude=["id"]) for course in courses])
         except Course.DoesNotExist:
             return dict(error="Course does not exist")
 

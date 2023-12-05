@@ -11,4 +11,4 @@ class CourseSerializer(serializers.Serializer):
     course_price = serializers.CharField(max_length=10)
     course_description = serializers.CharField()
     course_goal = serializers.CharField()
-    intro_video = serializers.FileField()
+    intro_video = serializers.FileField(required=False, allow_null=True)

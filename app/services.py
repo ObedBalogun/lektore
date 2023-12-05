@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from django.forms import model_to_dict
 
 from app.course.models import Course, Module
+from app.serializers import CustomTokenObtainPairSerializer
 from app.tutee.models import TuteeProfile
 from app.tutor.models import TutorProfile
 from app.shared_models import UserVerificationModel
@@ -27,7 +28,6 @@ class UserService:
     def create_user(cls, request, **kwargs) -> dict:
         first_name = kwargs.get("first_name")
         last_name = kwargs.get("last_name")
-        username = kwargs.get("username").lower()
         email = kwargs.get("email").lower()
         password = kwargs.get("password")
         role = kwargs.get("role")
@@ -36,12 +36,12 @@ class UserService:
         phone_number = kwargs.get("phone_number")
         profile_picture = kwargs.get("profile_picture")
         try:
-            if user_exists := User.objects.filter(username=username).exists():
+            if user_exists := User.objects.filter(username=email).exists():
                 return dict(
                     error="User already exists",
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=username,
+            user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
                                        password=password)
             user.set_password(password)
             user.save()
@@ -58,7 +58,8 @@ class UserService:
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
                 app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination"])
-            OTPService.request_otp(request=request, user=user)
+            otp,_ = OTPService.request_otp(request=request, user=user)
+            app_user.update({"otp":otp})
             return dict(data=app_user,
                         message=f"{role} with email, {email} successfully created")
 
@@ -111,7 +112,7 @@ class UserService:
             _user = authenticate(username=user.username, password=password)
             if _user is None:
                 return dict(error=status.HTTP_401_UNAUTHORIZED, message="Invalid credentials")
-            _login: Type[Token] = user_login(request, user)
+            _login: Type[Token] = user_login(request, user, user_data=dict(username=username, password=password)).validated_data
             try:
                 otp_is_verified = UserVerificationModel.objects.get(email=user.email).otp_is_verified
             except UserVerificationModel.DoesNotExist:
@@ -124,9 +125,10 @@ class UserService:
                 is_qualified = bool(user.tutor_profile.educational_qualifications)
             except Exception as e:
                 is_qualified = False
+
             return dict(
                 data={
-                    "token": _login.key,
+                    "token": dict(refresh=_login["refresh"], access=_login["access"]),
                     "email_is_verified": otp_is_verified,
                     "profile_id": user_id,
                     "role": "tutor" if user.tutor_profile else "tutee",
@@ -165,8 +167,7 @@ class OTPService:
         encoded_token = base64.b32encode(
             raw_token.encode()
         )  # Key is generated
-        otp = pyotp.TOTP(encoded_token, 4, interval=expiry_time)  # TOTP Model for OTP is created
-
+        otp = pyotp.TOTP(encoded_token, 6, interval=expiry_time)  # TOTP Model for OTP is created
         if not verify_otp:
             return otp, expiry_time / 60, verification_model
         if otp.verify(user_otp):
@@ -194,7 +195,7 @@ class OTPService:
             "domain": domain,
             "site_name": site_name,
             "user": authenticated_user.id,
-            "url": url
+            "OTP": url
         }
         email_body = render_to_string(email_template_name, data)
         subject = "Lektore Verification"
@@ -204,13 +205,12 @@ class OTPService:
             'to_email': user_email
         }
 
-        EmailManager.send_email(email_data)
-        return dict(message="Verification mail has been sent")
+        return otp.now(), dict(message="Verification mail has been sent")
 
     @classmethod
     def verify_email_otp(cls, request, **kwargs):
-        user_otp = kwargs.get("otp", request.GET.get("otp"))
-        email = kwargs.get("email", request.GET.get("email"))
+        user_otp = kwargs.get("otp", request.data.get("otp"))
+        email = kwargs.get("email", request.data.get("email"))
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:

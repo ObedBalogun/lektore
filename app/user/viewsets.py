@@ -142,7 +142,7 @@ class OTPViewSet(viewsets.ViewSet):
             else status.HTTP_200_OK
         )
 
-    @action(detail=False, methods=["get"], url_path="verify-email")
+    @action(detail=False, methods=["post"], url_path="verify-email")
     def verify_otp(self, request):
         response = OTPService.verify_email_otp(request)
         return ResponseManager.handle_response(

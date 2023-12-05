@@ -6,12 +6,17 @@ from rest_framework.authtoken.models import Token
 from datetime import datetime
 from django.conf import settings
 
+from app.serializers import CustomTokenObtainPairSerializer
 
-def user_login(request, user):
-    token, _ = Token.objects.get_or_create(user=user)
+
+def user_login(request, user, user_data):
     login(request, user)
+
+    token_data = CustomTokenObtainPairSerializer(data=user_data)
+    if not token_data.is_valid():
+        pass
     user_logged_in.send(sender=user.__class__, request=request, user=user)
-    return token
+    return token_data
 
 
 def user_logout(request):

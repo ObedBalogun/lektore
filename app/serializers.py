@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer as JwtTokenObtainPairSerializer
 
 
 def create_serializer_class(name, fields):
@@ -25,16 +26,36 @@ class UserSerializer(serializers.Serializer):
     password = serializers.CharField(style={"input_type": "password"}, required=True)
     first_name = serializers.CharField(max_length=50)
     last_name = serializers.CharField(max_length=50)
-    username = serializers.CharField(max_length=50)
-    phone_number = serializers.CharField(max_length=15)
+    # username = serializers.CharField(max_length=50, required=False, allow_null=True)
+    phone_number = serializers.CharField(max_length=15, required=False, allow_null=True)
     gender = serializers.CharField(max_length=15)
     nationality = serializers.CharField(max_length=5)
     email = serializers.EmailField()
     role = serializers.CharField(max_length=50)
-    profile_picture = serializers.ImageField(required=False)
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
 
 
 class UserDetailsSerializer(serializers.Serializer):
     password = serializers.CharField(style={"input_type": "password"}, required=True)
     username = serializers.CharField(max_length=50)
     email = serializers.EmailField(required=False)
+
+class CustomTokenObtainPairSerializer(JwtTokenObtainPairSerializer):
+    def validate(self, attrs):
+        try:
+            data = dict()
+            refresh = self.get_token(self.context["user"])
+            data["refresh"] = str(refresh)
+            data["access"] = str(refresh.access_token)
+            return data
+        except KeyError:
+            return super().validate(attrs)
+
+    def get_token(self, user):
+        token = super().get_token(user)
+        token["user_id"] = user.id
+        token["last_name"] = user.last_name
+        token["first_name"] = user.first_name
+        token["username"] = user.email
+        return token
+

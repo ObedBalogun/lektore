@@ -20,6 +20,7 @@ class TutorViewset(viewsets.ViewSet):
         return ResponseManager.handle_response(
             errors=response.get("error", None),
             data=response.get("data", None),
+            message=response.get("message", None),
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
             else status.HTTP_200_OK,
@@ -147,6 +148,7 @@ class TutorViewset(viewsets.ViewSet):
             if response.get("error", None)
             else status.HTTP_200_OK,
         )
+
     @action(detail=False, methods=["get"], url_path="tutor-dashboard")
     def dashboard(self, request):
         response = EducationService.dashboard(request.user)
