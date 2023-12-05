@@ -18,7 +18,7 @@ class CourseService:
             return dict(message=f"{tutor.user.first_name}'s course, {course.course_name}, created successfully",
                         data=model_to_dict(course, exclude=["id"]))
         except TutorProfile.DoesNotExist:
-            return dict(error=f"Tutor with ud {tutor_id} does not exist for this course")
+            return dict(error=f"Tutor with id {tutor_id} does not exist for this course")
         except Exception as e:
             return dict(error=f"Error {e}")
 
@@ -30,7 +30,8 @@ class CourseService:
                         data=[model_to_dict(course, exclude=["id"]) for course in courses])
         try:
             courses = Course.objects.filter(**kwargs)
-            return dict(data=[model_to_dict(course, exclude=["id"]) for course in courses])
+            return dict(data=[model_to_dict(course, exclude=["id"]) for course in courses],
+                        message="All courses retrieved successfully")
         except Course.DoesNotExist:
             return dict(error="Course does not exist")
 

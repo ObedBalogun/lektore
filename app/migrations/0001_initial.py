@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('course_category', models.CharField(choices=[('ielts', 'IELTS'), ('elocution', 'Elocution'), ('other', 'Other')], max_length=50)),
                 ('course_type', models.CharField(choices=[('live', 'Live'), ('other', 'Other')], max_length=50)),
                 ('course_rate', models.CharField(choices=[('hr', '/hr'), ('total', 'total')], max_length=10)),
-                ('course_price', models.CharField(max_length=10)),
+                ('course_price', models.DecimalField(decimal_places=2, default=0.0, max_digits=19)),
                 ('course_description', models.TextField()),
                 ('course_goal', models.TextField()),
                 ('intro_video', models.URLField(verbose_name='Link to video')),

@@ -49,48 +49,12 @@ class CourseViewSets(viewsets.ViewSet):
             else status.HTTP_200_OK,
         )
 
-    @action(detail=False, methods=["get"], url_path="get-course")
-    def get_course_by_id(self, request):
-        filter_params = request.GET.keys()
-        filter_values = request.GET.values()
-        filter_body = {param:value for param, value in zip(filter_params, filter_values)}
-        response = CourseService.get_course(**filter_body)
-        return ResponseManager.handle_response(
-            data=response.get("data"),
-            message=response.get("message"),
-            status=status.HTTP_400_BAD_REQUEST
-            if response.get("error", None)
-            else status.HTTP_200_OK
-        )
-    @action(detail=False, methods=["get"], url_path="filter-courses")
-    def get_course_by_id(self, request):
-        filter_params = request.GET.keys()
-        filter_values = request.GET.values()
-        filter_body = {param:value for param, value in zip(filter_params, filter_values)}
-        response = CourseService.get_course(**filter_body)
-        return ResponseManager.handle_response(
-            data=response.get("data"),
-            message=response.get("message"),
-            status=status.HTTP_400_BAD_REQUEST
-            if response.get("error", None)
-            else status.HTTP_200_OK
-        )
-
     @action(detail=False, methods=["get"], url_path="all-courses")
     def get_all_courses(self, request):
-        response = CourseService.get_course()
-        return ResponseManager.handle_response(
-            data=response.get("data"),
-            message=response.get("message"),
-            status=status.HTTP_400_BAD_REQUEST
-            if response.get("error", None)
-            else status.HTTP_200_OK
-        )
-
-    @action(detail=False, methods=["get"], url_path="get-course-by-tutor")
-    def get_course_by_tutor(self, request):
-        tutor_id = request.GET.get("tutor_id")
-        response = CourseService.get_course_by_tutor(tutor_id)
+        filter_params = request.GET.keys()
+        filter_values = request.GET.values()
+        filter_body = {param: value for param, value in zip(filter_params, filter_values)}
+        response = CourseService.get_course(**filter_body)
         return ResponseManager.handle_response(
             data=response.get("data"),
             message=response.get("message"),

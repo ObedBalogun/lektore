@@ -16,7 +16,7 @@ class Course(Timestamp):
     course_type = models.CharField(max_length=50, choices=(('live', 'Live'), ('other', 'Other')))
 
     course_rate = models.CharField(max_length=10, choices=(('hr', '/hr'), ('total', 'total')))
-    course_price = models.CharField(max_length=10)
+    course_price = models.DecimalField(default=0.00, decimal_places=2, max_digits=19)
     course_description = models.TextField()
     course_goal = models.TextField()
     intro_video = models.URLField(verbose_name="Link to video")
