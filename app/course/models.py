@@ -21,6 +21,7 @@ class Course(Timestamp):
     course_goal = models.TextField()
     intro_video = models.URLField(verbose_name="Link to video")
     is_active = models.BooleanField(default=True)
+    course_rating = models.IntegerField(default=0)
 
     def __str__(self):
         return self.course_name
@@ -43,7 +44,7 @@ class CourseOrder(Timestamp):
         return self.course.course_name
 class CourseEnrollment(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="course_enrollment")
-    tutee = models.ForeignKey(TuteeProfile, on_delete=models.PROTECT, related_name="tutee_course_class")
+    tutee = models.OneToOneField(TuteeProfile, on_delete=models.PROTECT, related_name="tutee_course_class")
 
     def get_total_tutees(self):
         return self.tutee_set.all().count()

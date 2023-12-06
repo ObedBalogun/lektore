@@ -25,12 +25,25 @@ class CourseService:
     @classmethod
     def get_course(cls, **kwargs):
         if not kwargs:
-            courses = Course.objects.all()
+            courses = Course.objects.select_related("tutor","tutor__user").prefetch_related("course_enrollment").all()
             return dict(message="All courses retrieved successfully",
-                        data=[model_to_dict(course, exclude=["id"]) for course in courses])
+                        data=[dict(course_name=course.course_name,
+                                  course_id=course.course_id,
+                                  tutor=dict(tutor_id=course.tutor.tutor_id,
+                                             tutor_name=course.tutor.user.get_full_name()),
+                                    created_date=course.created.strftime("%d %B %Y"),
+                                   download_count=course.course_enrollment.count(),
+                                  ) for course in courses])
         try:
-            courses = Course.objects.filter(**kwargs)
-            return dict(data=[model_to_dict(course, exclude=["id"]) for course in courses],
+            courses = Course.objects.select_related("tutor","tutor__user").prefetch_related("course_enrollment").filter(**kwargs)
+            return dict(data=[dict(course_name=course.course_name,
+                                  course_id=course.course_id,
+                                  tutor=dict(tutor_id=course.tutor.tutor_id,
+                                             tutor_name=course.tutor.user.get_full_name()),
+                                   created_date=course.created.strftime("%d %B %Y"),
+                                   download_count=course.course_enrollment.count(),
+                                  )
+                         for course in courses],
                         message="All courses retrieved successfully")
         except Course.DoesNotExist:
             return dict(error="Course does not exist")
