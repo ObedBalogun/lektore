@@ -51,13 +51,13 @@ class UserService:
                 app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
-                app_user = model_to_dict(app_user, exclude=["id", "nationality"])
+                app_user = model_to_dict(app_user, exclude=["id", "nationality","current_country"])
             if role == 'tutee':
                 tutee_id = GenerateID.generate_id(TuteeProfile, 5)
                 app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
-                app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination"])
+                app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination","current_country"])
             otp,_ = OTPService.request_otp(request=request, user=user)
             app_user.update({"otp":otp})
             return dict(data=app_user,
@@ -131,7 +131,7 @@ class UserService:
                     "token": dict(refresh=_login["refresh"], access=_login["access"]),
                     "email_is_verified": otp_is_verified,
                     "profile_id": user_id,
-                    "role": "tutor" if user.tutor_profile else "tutee",
+                    "role": "tutor" if hasattr(user,"tutor_profile") else "tutee",
                     "is_qualified": is_qualified,
                 },
                 message=f"User {username} successfully logged in")

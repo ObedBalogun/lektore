@@ -19,8 +19,11 @@ class CommonUserDetails(models.Model):
     postal_code = models.CharField(max_length=15, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     nationality = CountryField(blank=True)
+    current_country = CountryField(blank=True)
+    current_state = models.CharField(max_length=256,null=True,blank=True)
     gender = models.CharField(max_length=15, choices=GENDER, blank=True, null=True)
     profile_picture = models.CharField(max_length=255, blank=True, null=True)
+    date_of_birth = models.DateField(null=True, blank=True, default="1888-08-08")
 
     class Meta:
         abstract = True

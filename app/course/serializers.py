@@ -10,5 +10,5 @@ class CourseSerializer(serializers.Serializer):
     course_rate = serializers.CharField(max_length=10)
     course_price = serializers.DecimalField(max_digits=19, decimal_places=2, allow_null=False)
     course_description = serializers.CharField()
-    course_goal = serializers.CharField()
+    course_overview = serializers.CharField()
     intro_video = serializers.FileField(required=False, allow_null=True)

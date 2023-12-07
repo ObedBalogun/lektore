@@ -75,6 +75,7 @@ class ModuleService:
         try:
             course = Course.objects.get(course_id=course_id)
             module_details['course'] = course
+            module_details.pop("course_id")
             module = Module.objects.create(**module_details)
             return dict(message=f"module for course, {course.course_name}, created successfully",
                         data=model_to_dict(module, exclude=["id"]))
