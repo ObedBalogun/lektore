@@ -11,6 +11,11 @@ class TutorProfile(CommonUserDetails, Timestamp):
     is_verified = models.BooleanField(default=False)
     is_qualified = models.BooleanField(default=False)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['tutor_id']),
+        ]
+
     def __str__(self):
         return self.user.username
 

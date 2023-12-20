@@ -22,6 +22,10 @@ class Course(Timestamp):
     intro_video = models.URLField(verbose_name="Link to video")
     is_active = models.BooleanField(default=True)
     course_rating = models.IntegerField(default=0)
+    class Meta:
+        indexes = [
+            models.Index(fields=['course_id']),
+        ]
 
     def __str__(self):
         return self.course_name
@@ -33,7 +37,6 @@ class Module(Timestamp):
     module_video = models.URLField(verbose_name="Link to module video",null=True)
     module_audio = models.URLField(verbose_name="Link to module audio",null=True)
     module_pdf = models.URLField(verbose_name="Link to module pdf")
-    module_completion_level = models.JSONField(verbose_name="completed tasks", null=True)
 
     def __str__(self):
         return self.module_name
@@ -44,10 +47,11 @@ class CourseOrder(Timestamp):
 
     def __str__(self):
         return self.course.course_name
+
 class CourseEnrollment(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="course_enrollment")
     tutee = models.ForeignKey(TuteeProfile, on_delete=models.PROTECT, related_name="tutee_course_class")
-    completion_level = models.IntegerField(default=0)
+    module_completion_level = models.JSONField(verbose_name="completed tasks", null=True),
     completed_date = models.DateField(null=True, blank=True)
     last_seen = models.DateField(null=True, blank=True)
 

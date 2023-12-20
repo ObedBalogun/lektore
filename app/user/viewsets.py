@@ -1,6 +1,6 @@
 from rest_framework.decorators import action
 from rest_framework import permissions, status, viewsets, serializers
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from app.serializers import UserSerializer, UserDetailsSerializer, inline_serializer
 from app.services import OTPService, UserService, AzureStorageService
@@ -10,7 +10,7 @@ from decouple import config
 
 
 class UserViewSet(viewsets.ViewSet):
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     @action(detail=False, methods=["post"], url_path="register-user")
     def register_user(self, request):

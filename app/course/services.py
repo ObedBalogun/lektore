@@ -25,25 +25,26 @@ class CourseService:
     @classmethod
     def get_course(cls, **kwargs):
         if not kwargs:
-            courses = Course.objects.select_related("tutor","tutor__user").prefetch_related("course_enrollment").all()
+            courses = Course.objects.select_related("tutor", "tutor__user").prefetch_related("course_enrollment").all()
             return dict(message="All courses retrieved successfully",
                         data=[dict(course_name=course.course_name,
-                                  course_id=course.course_id,
-                                  tutor=dict(tutor_id=course.tutor.tutor_id,
-                                             tutor_name=course.tutor.user.get_full_name()),
-                                    created_date=course.created.strftime("%d %B %Y"),
-                                   download_count=course.course_enrollment.count(),
-                                  ) for course in courses])
-        try:
-            courses = Course.objects.select_related("tutor","tutor__user").prefetch_related("course_enrollment").filter(**kwargs)
-            return dict(data=[dict(course_name=course.course_name,
-                                  course_id=course.course_id,
-                                  tutor=dict(tutor_id=course.tutor.tutor_id,
-                                             tutor_name=course.tutor.user.get_full_name()),
+                                   course_id=course.course_id,
+                                   tutor=dict(tutor_id=course.tutor.tutor_id,
+                                              tutor_name=course.tutor.user.get_full_name()),
                                    created_date=course.created.strftime("%d %B %Y"),
                                    download_count=course.course_enrollment.count(),
-                                  )
-                         for course in courses],
+                                   ) for course in courses])
+        try:
+            courses = Course.objects.select_related("tutor", "tutor__user").prefetch_related(
+                "course_enrollment").filter(**kwargs)
+            return dict(data=[dict(course_name=course.course_name,
+                                   course_id=course.course_id,
+                                   tutor=dict(tutor_id=course.tutor.tutor_id,
+                                              tutor_name=course.tutor.user.get_full_name()),
+                                   created_date=course.created.strftime("%d %B %Y"),
+                                   download_count=course.course_enrollment.count(),
+                                   )
+                              for course in courses],
                         message="All courses retrieved successfully")
         except Course.DoesNotExist:
             return dict(error="Course does not exist")
@@ -67,6 +68,7 @@ class CourseService:
         except Course.DoesNotExist:
             return dict(error=f"Course {course_id} does not exist")
 
+
 class ModuleService:
     @classmethod
     def create_module(cls, **kwargs):
@@ -82,3 +84,35 @@ class ModuleService:
         except Course.DoesNotExist:
             return dict(error="Error creating module")
 
+    @classmethod
+    def get_modules(cls, **kwargs):
+        if not kwargs:
+            modules = Module.objects.select_related("course").all()
+            return dict(message="All courses retrieved successfully",
+                        data=[dict(course_name=module.course.course_name,
+                                   course_id=module.course.course_id,
+                                   created_date=module.course.created.strftime("%d %B %Y"),
+                                   module_description=module.module_description,
+                                   module_duration=module.module_duration,
+                                   module_video=module.module_video,
+                                   module_audio=module.module_audio,
+                                   module_pdf=module.module_pdf,
+                                   ) for module in modules])
+        try:
+            filterset = kwargs.copy()
+            if "course_id" in filterset:
+                filterset["course__course_id"] = filterset.pop("course_id")
+            filterset = {f"{key}__icontains": value for key, value in filterset.items()}
+            modules = Module.objects.select_related("course").filter(**filterset).order_by("created")
+            return dict(data=[dict(course_name=module.course.course_name,
+                                   course_id=module.course.course_id,
+                                   created_date=module.course.created.strftime("%d %B %Y"),
+                                   module_description=module.module_description,
+                                   module_duration=module.module_duration,
+                                   module_video=module.module_video,
+                                   module_audio=module.module_audio,
+                                   module_pdf=module.module_pdf,
+                                   ) for module in modules],
+                        message="All courses retrieved successfully")
+        except Course.DoesNotExist:
+            return dict(error="Course does not exist")

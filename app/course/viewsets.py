@@ -49,7 +49,7 @@ class CourseViewSets(viewsets.ViewSet):
             else status.HTTP_200_OK,
         )
 
-    @action(detail=False, methods=["get"], url_path="all-courses")
+    @action(detail=False, methods=["get"], url_path="courses")
     def get_all_courses(self, request):
         filter_params = request.GET.keys()
         filter_values = request.GET.values()
@@ -148,4 +148,18 @@ class CourseViewSets(viewsets.ViewSet):
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
             else status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["get"], url_path="modules")
+    def get_modules(self, request):
+        filter_params = request.GET.keys()
+        filter_values = request.GET.values()
+        filter_body = dict(zip(filter_params, filter_values))
+        response = ModuleService.get_modules(**filter_body)
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK
         )
