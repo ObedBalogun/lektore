@@ -28,6 +28,7 @@ services:
   lektore-postgres:
     image: postgres:latest
     container_name: lektore-postgres
+    restart: always
     environment:
       - POSTGRES_DB=lektore-db
       - POSTGRES_USER=postgres
@@ -35,7 +36,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
 
   lektore-redis:
     image: redis:alpine
