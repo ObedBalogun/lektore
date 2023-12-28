@@ -29,6 +29,17 @@ class Course(Timestamp):
 
     def __str__(self):
         return self.course_name
+
+    @property
+    def course_completion_percentage(self):
+        module_count = self.course_modules.count()
+        course_modules = Module.objects.filter(course_id=self.course_id)
+        completed_modules = len([
+            module for module in course_modules if module.is_module_completed
+        ])
+        return(completed_modules/module_count)*100
+
+
 class Module(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="course_modules")
     module_name = models.CharField(max_length=256)
@@ -37,9 +48,25 @@ class Module(Timestamp):
     module_video = models.URLField(verbose_name="Link to module video",null=True)
     module_audio = models.URLField(verbose_name="Link to module audio",null=True)
     module_pdf = models.URLField(verbose_name="Link to module pdf")
+    is_module_video_completed = models.BooleanField(default=False)
+    is_module_audio_completed = models.BooleanField(default=False)
+    is_module_pdf_completed = models.BooleanField(default=False)
+
+
+    ####### IN CASE OF MIGRATION TO 5.0 #######
+    # is_completed = models.GeneratedField(
+    #     expression=F("is_module_video_completed") and F("is_module_audio_completed") and F("is_module_pdf_completed"),
+    #     output_field=models.BooleanField(),
+    #     db_persist=False
+    # )
 
     def __str__(self):
         return self.module_name
+
+    @property
+    def is_module_completed(self):
+        return self.is_module_video_completed and self.is_module_audio_completed and self.is_module_pdf_completed
+
 class CourseOrder(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="course_orders")
     tutee = models.ForeignKey(User, on_delete=models.PROTECT)

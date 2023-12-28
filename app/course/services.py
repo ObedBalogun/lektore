@@ -88,7 +88,7 @@ class ModuleService:
     def get_modules(cls, **kwargs):
         if not kwargs:
             modules = Module.objects.select_related("course").all()
-            return dict(message="All courses retrieved successfully",
+            return dict(message="All modules retrieved successfully",
                         data=[dict(course_name=module.course.course_name,
                                    course_id=module.course.course_id,
                                    created_date=module.course.created.strftime("%d %B %Y"),
@@ -113,6 +113,6 @@ class ModuleService:
                                    module_audio=module.module_audio,
                                    module_pdf=module.module_pdf,
                                    ) for module in modules],
-                        message="All courses retrieved successfully")
+                        message="Modules retrieved successfully")
         except Course.DoesNotExist:
             return dict(error="Course does not exist")
