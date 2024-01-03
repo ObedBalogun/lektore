@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from app.community.viewsets import CommunityPostViewSets
 from app.course.viewsets import CourseViewSets
 from app.chat.viewsets import ChatThreadViewSet, ChatMessageViewSet
 from app.schedule.viewsets import ScheduleViewSet, AvailabilityViewSet
@@ -25,6 +26,7 @@ router.register(r"user-conversations", ChatThreadViewSet, basename="chat")
 router.register(r"chat-messages", ChatMessageViewSet, basename="chat-thread")
 router.register(r"schedule", ScheduleViewSet, basename="schedule-view")
 router.register(r"availability", AvailabilityViewSet, basename="availability-view")
+router.register(r"community", CommunityPostViewSets, basename="community")
 
 # router.register(r"course", ModuleViewSets, basename="module")
 
