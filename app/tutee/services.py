@@ -50,14 +50,17 @@ class TuteeService:
         cart_items = kwargs.get("cart_items")
         for cart_item in cart_items:
             course_id = cart_item.get("course_id")
-            #TODO: register course and create object
+            # TODO: register course and create object
             course = Course.objects.get(course_id=course_id)
 
     @classmethod
     def update_course(cls, **kwargs):
-        registered_course = RegisteredTuteeCourse.objects.select_related("tutee").get(module__id=kwargs.get("module_id"),
-                                                              tutee__tutee_id=kwargs.get("tutee_id"))
+        registered_course = RegisteredTuteeCourse.objects.select_related("tutee").get(
+            module__id=kwargs.get("module_id"),
+            tutee__tutee_id=kwargs.get("tutee_id"))
         for key, value in kwargs.items():
             if key not in ["tutee_id", "module_id"]:
                 setattr(registered_course, key, value)
         registered_course.save()
+
+        return dict(data=model_to_dict(registered_course), message="Course has been updated")
