@@ -2,6 +2,7 @@ from app.course.models import Course, Module
 from app.tutor.models import TutorProfile
 from app.helpers import GenerateID
 from django.forms import model_to_dict
+from django.db.models import Q
 
 
 class CourseService:
@@ -89,22 +90,25 @@ class ModuleService:
         if not kwargs:
             modules = Module.objects.select_related("course").all()
             return dict(message="All modules retrieved successfully",
-                        data=[dict(course_name=module.course.course_name,
-                                   course_id=module.course.course_id,
-                                   created_date=module.course.created.strftime("%d %B %Y"),
-                                   module_description=module.module_description,
-                                   module_duration=module.module_duration,
-                                   module_video=module.module_video,
-                                   module_audio=module.module_audio,
-                                   module_pdf=module.module_pdf,
-                                   ) for module in modules])
+                        data=[dict(
+                            module_id=module.id,
+                            course_name=module.course.course_name,
+                            course_id=module.course.course_id,
+                            created_date=module.course.created.strftime("%d %B %Y"),
+                            module_description=module.module_description,
+                            module_duration=module.module_duration,
+                            module_video=module.module_video,
+                            module_audio=module.module_audio,
+                            module_pdf=module.module_pdf,
+                        ) for module in modules])
         try:
             filterset = kwargs.copy()
             if "course_id" in filterset:
                 filterset["course__course_id"] = filterset.pop("course_id")
             filterset = {f"{key}__icontains": value for key, value in filterset.items()}
             modules = Module.objects.select_related("course").filter(**filterset).order_by("created")
-            return dict(data=[dict(course_name=module.course.course_name,
+            return dict(data=[dict(module_id=module.id,
+                                   course_name=module.course.course_name,
                                    course_id=module.course.course_id,
                                    created_date=module.course.created.strftime("%d %B %Y"),
                                    module_description=module.module_description,
@@ -116,3 +120,10 @@ class ModuleService:
                         message="Modules retrieved successfully")
         except Course.DoesNotExist:
             return dict(error="Course does not exist")
+
+    @classmethod
+    def update_module(cls, **kwargs):
+        module = Module.objects.get(id=kwargs.get("module_id"))
+        for key, value in kwargs.items():
+            if key not in ["tutee_id", "course_id"]:
+                setattr(module, key, value)

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app.course.models import CourseEnrollment, Course
+from app.course.models import Course
 from app.schedule.models import Schedule
 from app.tutor.models import TutorProfile, EducationalQualification
 from django.forms import model_to_dict
@@ -73,17 +73,16 @@ class EducationService:
 
     @classmethod
     def dashboard(cls, request):
-        tutor = TutorProfile.objects.get(user=request.user)
-        schedule = Schedule.objects.filter(user=request.user, start_time__gte=datetime.now()).count()
+        tutor = TutorProfile.objects.select_related("tutor_courses").get(user=request.user)
         courses = tutor.tutor_courses.filter(is_active=True).count()
         total_earnings = Wallet.objects.filter(user=request.user).balance
-        tutor_courses = Course.objects.filter(tutor=tutor)
+        tutor_courses = tutor.tutor_courses.all()
         total_students = sum(
-            course.course_enrollment.count()
+            course.tutee_orders.count()
             for course in tutor_courses
-            if course.course_enrollment
+            if hasattr(course,"tutor_courses")
         )
 
-        payload = dict(upcoming_classes=schedule, active_courses=courses, total_earnings=total_earnings,
+        payload = dict(active_courses=courses, total_earnings=total_earnings,
                        total_students=total_students)
         return dict(data=payload)

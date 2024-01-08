@@ -1,4 +1,5 @@
-from app.tutee.models import TuteeProfile
+from app.course.models import Course
+from app.tutee.models import TuteeProfile, RegisteredTuteeCourse
 from django.forms import model_to_dict
 
 
@@ -43,3 +44,20 @@ class TuteeService:
         except Exception as e:
             print(str(e))
             return dict(error="Tutee does not exist")
+
+    @classmethod
+    def purchase_course(cls, **kwargs):
+        cart_items = kwargs.get("cart_items")
+        for cart_item in cart_items:
+            course_id = cart_item.get("course_id")
+            #TODO: register course and create object
+            course = Course.objects.get(course_id=course_id)
+
+    @classmethod
+    def update_course(cls, **kwargs):
+        registered_course = RegisteredTuteeCourse.objects.select_related("tutee").get(module__id=kwargs.get("module_id"),
+                                                              tutee__tutee_id=kwargs.get("tutee_id"))
+        for key, value in kwargs.items():
+            if key not in ["tutee_id", "module_id"]:
+                setattr(registered_course, key, value)
+        registered_course.save()
