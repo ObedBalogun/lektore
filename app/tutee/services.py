@@ -58,8 +58,9 @@ class TuteeService:
         registered_course = RegisteredTuteeCourse.objects.select_related("tutee").get(
             module__id=kwargs.get("module_id"),
             tutee__tutee_id=kwargs.get("tutee_id"))
+
         for key, value in kwargs.items():
-            if key not in ["tutee_id", "module_id"]:
+            if key not in ["tutee_id", "module_id"] and not getattr(registered_course, key):
                 setattr(registered_course, key, value)
         registered_course.save()
 

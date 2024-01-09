@@ -19,6 +19,9 @@ class TuteeProfile(CommonUserDetails):
     to_destination = CountryField(blank=True)
     last_seen = models.DateField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.tutee_id}"
+
 
 class TuteeOrder(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="tutee_orders")

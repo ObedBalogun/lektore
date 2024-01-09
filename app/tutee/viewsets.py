@@ -66,5 +66,6 @@ class TuteeViewset(viewsets.ViewSet, CustomResponseMixin):
         )
         if errors := self.validate_serializer(serialized_data):
             return errors
+
         response = TuteeService.update_course(**serialized_data.data)
         return self.response(response)

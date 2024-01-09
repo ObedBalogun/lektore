@@ -16,8 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from app.custom_admin import CustomAdminSite
+
+custom_admin_site = CustomAdminSite(name='customadmin')
+
 urlpatterns = [
-    path('lektore-nimda/', admin.site.urls),
+    path('lektore-nimda/', custom_admin_site.urls),
     path('lektore-api-v1/', include("app.urls")),
     path('api-auth/', include('rest_framework.urls')),
 
