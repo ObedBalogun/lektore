@@ -8,12 +8,40 @@ from django.contrib.postgres.indexes import BrinIndex
 
 class Wallet(Timestamp):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="user_wallet")
+    # TODO: Use IntegerField instead?!
     balance = models.DecimalField(default=0.00, decimal_places=2, max_digits=19)
     user_category = models.CharField(max_length=10, choices=USER_CATEGORY)
     provider = models.CharField(max_length=150)
 
     def __str__(self):
         return self.user.username
+
+    def credit_wallet(self, amount, kobo=False):
+        if not amount or amount == 0:
+            return False
+        try:
+            if kobo:
+                self.balance = int(self.balance) + amount/100
+            else:
+                self.balance = int(self.balance) + amount
+            self.save()
+        except ValueError:
+            return False
+        return True
+
+    def debit_wallet(self, amount, kobo=False):
+        if not amount or amount == 0:
+            return False
+        try:
+            if kobo:
+                amount = amount / 100
+            if amount > self.balance:
+                return False
+            self.balance = self.balance - amount
+            self.save()
+        except ValueError:
+            return False
+        return True
 
 
 class WalletTransaction(Timestamp):
