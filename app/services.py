@@ -51,15 +51,16 @@ class UserService:
                 app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
-                app_user = model_to_dict(app_user, exclude=["id", "nationality","current_country"])
+                app_user = model_to_dict(app_user, exclude=["id", "nationality", "current_country"])
             if role == 'tutee':
                 tutee_id = GenerateID.generate_id(TuteeProfile, 5)
                 app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
                                                        profile_picture=profile_picture)
-                app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination","current_country"])
-            otp,_ = OTPService.request_otp(request=request, user=user)
-            app_user.update({"otp":otp})
+                app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination",
+                                                            "current_country"])
+            otp, _ = OTPService.request_otp(request=request, user=user)
+            app_user.update({"otp": otp})
             return dict(data=app_user,
                         message=f"{role} with email, {email} successfully created")
 
@@ -112,7 +113,8 @@ class UserService:
             _user = authenticate(username=user.username, password=password)
             if _user is None:
                 return dict(error=status.HTTP_401_UNAUTHORIZED, message="Invalid credentials")
-            _login: Type[Token] = user_login(request, user, user_data=dict(username=username, password=password)).validated_data
+            _login: Type[Token] = user_login(request, user,
+                                             user_data=dict(username=username, password=password)).validated_data
             try:
                 otp_is_verified = UserVerificationModel.objects.get(email=user.email).otp_is_verified
             except UserVerificationModel.DoesNotExist:
@@ -131,7 +133,7 @@ class UserService:
                     "token": dict(refresh=_login["refresh"], access=_login["access"]),
                     "email_is_verified": otp_is_verified,
                     "profile_id": user_id,
-                    "role": "tutor" if hasattr(user,"tutor_profile") else "tutee",
+                    "role": "tutor" if hasattr(user, "tutor_profile") else "tutee",
                     "is_qualified": is_qualified,
                 },
                 message=f"User {username} successfully logged in")
