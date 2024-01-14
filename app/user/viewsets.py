@@ -4,7 +4,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from app.serializers import UserSerializer, UserDetailsSerializer, inline_serializer
 from app.services import OTPService, UserService, AzureStorageService
-from app.utils.utils import ResponseManager
+from app.utils.utils import ResponseManager, CustomResponseMixin
 
 from decouple import config
 
@@ -144,7 +144,7 @@ class OTPViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["post"], url_path="verify-email")
     def verify_otp(self, request):
-        response = OTPService.verify_email_otp(request)
+        _, response = OTPService.verify_email_otp(request)
         return ResponseManager.handle_response(
             errors=response.get("error", None),
             message=response.get("success", None),
@@ -152,3 +152,54 @@ class OTPViewSet(viewsets.ViewSet):
             if response.get("error", None)
             else status.HTTP_200_OK
         )
+
+
+class PasswordViewSet(CustomResponseMixin, viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=["post"], url_path="request")
+    def request_password_reset(self, request):
+        serialized_data = inline_serializer(
+            fields={
+                "email": serializers.EmailField(),
+            },
+            data=request.data)
+        errors = self.validate_serializer(serialized_data)
+        if errors:
+            return errors
+        email = serialized_data.validated_data['email']
+        response = OTPService.request_otp(request, initiator="reset", email=email)
+        return self.response(response)
+
+    @action(detail=False, methods=["post"], url_path="request-complete")
+    def reset_password(self, request):
+        serialized_data = inline_serializer(
+            fields={
+                "password": serializers.CharField(max_length=16, style={"input_type": "password"}),
+                "otp": serializers.CharField(max_length=16),
+                "email": serializers.EmailField(),
+            },
+            data=request.data)
+        errors = self.validate_serializer(serialized_data)
+        if errors:
+            return errors
+        response = UserService.reset_password(**serialized_data)
+
+        return self.response(response)
+
+    @action(detail=False, methods=["post"], url_path="request-complete", permissions=[permissions.IsAuthenticated])
+    def change_password(self, request):
+        serialized_data = inline_serializer(
+            fields={
+                "old_password": serializers.CharField(max_length=16, style={"input_type": "password"}),
+                "new_password": serializers.CharField(max_length=16, style={"input_type": "password"}),
+            },
+            data=request.data)
+        errors = self.validate_serializer(serialized_data)
+        if errors:
+            return errors
+        response = UserService.change_password(**serialized_data)
+
+        return self.response(response)
+
+

@@ -146,9 +146,32 @@ class UserService:
         return dict(message="User successfully logged out")
 
     @classmethod
-    def forgot_password(cls, **kwargs) -> dict:
+    def reset_password(cls, **kwargs) -> dict:
+        password = kwargs.get("password")
+        submitted_otp = kwargs.get("otp")
         email = kwargs.get("email")
-        return {}
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return dict(error="User does not exist")
+        verified, err = OTPService.verify_email_otp(submitted_otp, user)
+        if not verified:
+            return err
+        user.set_password(password)
+        user.save()
+        return dict(success="Password reset successfully!")
+
+    @classmethod
+    def change_password(cls, request, **kwargs) -> dict:
+        user = request.user
+        old_password = kwargs.get("old_password")
+        if user.check_password(old_password):
+            new_password = kwargs.get("new_password")
+            user.set_password(new_password)
+            user.save()
+            return dict(success="Password changed successfully!")
+        else:
+            return dict(error="Password mismatch!")
 
 
 class OTPService:
