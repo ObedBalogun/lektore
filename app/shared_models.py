@@ -33,6 +33,8 @@ class UserVerificationModel(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.CharField(max_length=80, null=True, blank=True)
     otp_is_verified = models.BooleanField(blank=False, default=False)
+    new_reset = models.BooleanField(default=False)
+    new_verification = models.BooleanField(default=False)
     counter = models.IntegerField(default=0, blank=False)  # For non-timed otp Verification
 
     def __str__(self):
