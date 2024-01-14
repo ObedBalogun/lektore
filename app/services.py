@@ -153,72 +153,103 @@ class UserService:
 
 class OTPService:
     @classmethod
-    def _generate_or_verify_timed_otp(cls, user, email, verify_otp=False, user_otp=None):
+    def _initiator(cls, obj, url=False, user=None, otp=None):
+        env = config("ENV")
+        # lektore_url = config("LEKTORE_URL_PROD") if env == "PROD" else config("LEKTORE_URL_TEST")
+        host_machine = "http://localhost:3000" if env == "TEST" else "http://lektore.netlify.app"
+
+        _dict_obj = {
+            "reset": ("new_reset", "Password Reset"),
+            "verification": ("new_verification", "Email Verification"),
+        }
+        try:
+            _url_obj = {
+                "reset": (f"{host_machine}/password-reset/{user.email}/{otp.now()}",
+                          "email_template/password_reset.html"),
+                "verification": (f"{host_machine}/email-verification/{user.email}/{otp.now()}",
+                                 "email_template/email_verification.html"),
+            }
+            if url:
+                return _url_obj.get(obj)
+        except AttributeError:
+            pass
+        return _dict_obj.get(obj)
+
+    @classmethod
+    def _generate_or_verify_timed_otp(cls, user, initiator="verification", verify_otp=False, user_otp=None):
         expiry_time = int(config("RESET_EXPIRY_TIME"))  # seconds
+        attr, _ = cls._initiator(initiator)
         if verify_otp:
             try:
-                verification_model = UserVerificationModel.objects.get(email=email)
+                verification_model = UserVerificationModel.objects.get(email=user.email)
+                # Ensure the OTP is for the verification purpose; email verification or password reset
+                if not getattr(verification_model, attr) is True:
+                    return False, dict(error='Invalid request!')
+
             except UserVerificationModel.DoesNotExist:
-                return dict(error="User does not exist")
+                return False, dict(error='Invalid request!')
         else:
             verification_model, _ = UserVerificationModel.objects.get_or_create(
-                user=user,
-                email=email,
+                user=user
             )
-        raw_token: str = generate_key(email)
+        raw_token: str = generate_key(user.email)
         encoded_token = base64.b32encode(
             raw_token.encode()
         )  # Key is generated
         otp = pyotp.TOTP(encoded_token, 6, interval=expiry_time)  # TOTP Model for OTP is created
         if not verify_otp:
-            return otp, expiry_time / 60, verification_model
-        if otp.verify(user_otp):
-            verification_model.otp_is_verified = True
+            setattr(verification_model, attr, True)
             verification_model.save()
-            return otp.verify(user_otp)
+            return otp.now(), expiry_time / 60, verification_model
+        else:
+            if otp.verify(user_otp):
+                setattr(verification_model, attr, False)
+                verification_model.save()
+            return otp.verify(user_otp), dict(error="Invalid OTP")
 
     @classmethod
-    def request_otp(cls, request=None, user=None):
-        env = config("ENV")
-        lektore_url = config("LEKTORE_URL_PROD") if env == "PROD" else config("LEKTORE_URL_TEST")
+    def request_otp(cls, request, initiator='verification', user=None, email=None):
+        email = email or request.query_params.get('email')
+        if not user:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return dict(error='User not found!')
 
-        # authenticated_user = request.user if user is None else user
-        # user_email = authenticated_user.email
-        user_email = request.GET.get("email") or user.email
-        authenticated_user = User.objects.get(email=user_email)
-        otp, expiry_time, verification_obj = cls._generate_or_verify_timed_otp(authenticated_user, user_email)
-        host_machine = "http://localhost:3000" if env == "TEST" else "http://lektore.netlify.app"
-        url = f"{host_machine}/email-verification/{authenticated_user.email}/{otp.now()}"
-        email_template_name = "email_template/email_verification.html"
+        otp, expiry_time, _ = cls._generate_or_verify_timed_otp(user, initiator)
+
+        # This Url leads to an external web application for verification
+        url, email_template_name = cls._initiator(initiator, True, user, otp)
+        _, email_subject = cls._initiator(initiator)
         domain = request.META["HTTP_HOST"] if request else "lektore.com"
         site_name = "Lektore"
         data = {
-            "email": user_email,
+            "email": user.email,
             "domain": domain,
             "site_name": site_name,
-            "user": authenticated_user.id,
+            "user": user.id,
             "OTP": url
         }
         email_body = render_to_string(email_template_name, data)
-        subject = "Lektore Verification"
         email_data = {
-            'email_subject': subject,
+            'email_subject': email_subject,
             'email_body': email_body,
-            'to_email': user_email
+            'to_email': user.email
         }
-
-        return otp.now(), dict(message="Verification mail has been sent")
+        # email_user(**data)
+        return otp, dict(success=f"{email_subject} OTP has been sent", data=url)
 
     @classmethod
-    def verify_email_otp(cls, request, **kwargs):
+    def verify_email_otp(cls, request, user=None, **kwargs):
         user_otp = kwargs.get("otp", request.data.get("otp"))
         email = kwargs.get("email", request.data.get("email"))
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return dict(error="User does not exist")
-        verified = cls._generate_or_verify_timed_otp(user, user.email, verify_otp=True, user_otp=user_otp)
-        return dict(success="OTP verified successfully") if verified else dict(error="Invalid OTP")
+        if not user:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return dict(error="User does not exist")
+        verified, error_response = cls._generate_or_verify_timed_otp(user, verify_otp=True, user_otp=user_otp)
+        return (True, dict(success="OTP verified successfully")) if verified else (False, error_response)
 
 
 class SearchBarService:
