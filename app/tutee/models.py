@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django_countries.fields import CountryField
 
@@ -12,8 +11,8 @@ class TuteeProfile(CommonUserDetails):
     tutee_id = models.CharField(max_length=10, unique=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="tutee_profile")
     experience_level = models.CharField(max_length=100, choices=EXPERIENCE, blank=True, null=True)
-    service = ArrayField(models.CharField(max_length=100, choices=SERVICES), blank=True,
-                         null=True, default=list)
+    # service = ArrayField(models.CharField(max_length=100, choices=SERVICES), blank=True,
+    #                      null=True, default=list)
     is_qualified = models.BooleanField(default=False)
     from_destination = CountryField(blank=True)
     to_destination = CountryField(blank=True)
@@ -53,3 +52,12 @@ class RegisteredTuteeCourse(Timestamp):
     @property
     def is_completed(self):
         return self.is_module_video_completed and self.is_module_audio_completed and self.is_module_pdf_completed
+
+    @property
+    def course_completion_percentage(self):
+        module_count = self.course.course_modules.count()
+        course_modules = Module.objects.filter(course_id=self.course_id)
+        completed_modules = len([
+            module for module in course_modules if module.is_module_completed
+        ])
+        return (completed_modules / module_count) * 100

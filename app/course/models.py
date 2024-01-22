@@ -6,17 +6,16 @@ from app.shared_models import Timestamp
 class Course(Timestamp):
     course_name = models.CharField(max_length=255)
     course_id = models.CharField(max_length=25, unique=True)
-    tutor = models.ForeignKey(TutorProfile, on_delete=models.CASCADE, related_name="tutor_courses")
-    course_duration = models.FloatField(default=0, verbose_name="Course Duration in hours")
-    course_category = models.CharField(max_length=50,
-                                       choices=(('ielts', 'IELTS'), ('elocution', 'Elocution'), ('other', 'Other')))
+    tutor = models.ForeignKey(TutorProfile, on_delete=models.CASCADE)
+    course_duration = models.FloatField(default=0)
+    course_category = models.CharField(max_length=50)
     course_type = models.CharField(max_length=50, choices=(('live', 'Live'), ('other', 'Other')))
 
     course_rate = models.CharField(max_length=10, choices=(('hr', '/hr'), ('total', 'total')))
     course_price = models.DecimalField(default=0.00, decimal_places=2, max_digits=19)
     course_description = models.TextField()
     course_overview = models.TextField()
-    intro_video = models.URLField(verbose_name="Link to video")
+    intro_video = models.URLField()
     is_active = models.BooleanField(default=True)
     course_rating = models.IntegerField(default=0)
 
@@ -27,15 +26,6 @@ class Course(Timestamp):
 
     def __str__(self):
         return self.course_name
-
-    @property
-    def course_completion_percentage(self):
-        module_count = self.course_modules.count()
-        course_modules = Module.objects.filter(course_id=self.course_id)
-        completed_modules = len([
-            module for module in course_modules if module.is_module_completed
-        ])
-        return (completed_modules / module_count) * 100
 
 
 class Module(Timestamp):
@@ -49,3 +39,6 @@ class Module(Timestamp):
 
     def __str__(self):
         return self.module_name
+
+
+

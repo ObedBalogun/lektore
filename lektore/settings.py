@@ -99,25 +99,31 @@ WSGI_APPLICATION = 'lektore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DB_NAME = config('LOCAL_DB_NAME')
-DB_USER = config('LOCAL_DB_USER')
-DB_HOST = config('LOCAL_DB_HOST')
-DB_PORT = config('LOCAL_DB_PORT')
-DB_PASSWORD = config('LOCAL_DB_PASSWORD')
+DB_NAME = config('AZURE_DB_NAME')
+DB_USER = config('AZURE_DB_USER')
+DB_HOST = config('AZURE_DB_HOST')
+DB_PORT = config('AZURE_DB_PORT')
+DB_PASSWORD = config('AZURE_DB_PASSWORD')
 
-DB_DETAILS = {
-    'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': DB_NAME,
-    'USER': DB_USER,
-    'PASSWORD': DB_PASSWORD,
-    'HOST': DB_HOST,
-    'PORT': DB_PORT,
-    # 'OPTIONS': {'sslmode': 'require'},
-}
 
 DATABASES = {
-    'default': DB_DETAILS
+    'default': {
+        'ENGINE': 'mssql',
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'OPTIONS': {
+            'driver': 'ODBC Driver 18 for SQL Server',
+            'MARS_Connection': True,
+            'Encrypt': 'yes',
+            'TrustServerCertificate': 'no',
+            'Connection Timeout': 30,
+        },
+    },
 }
+
 
 # CORS SETUP
 CORS_ALLOW_ALL_ORIGINS = True

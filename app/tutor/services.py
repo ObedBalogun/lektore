@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from app.course.models import Course
-from app.schedule.models import Schedule
+# from app.schedule.models import Schedule
 from app.tutor.models import TutorProfile, EducationalQualification
 from django.forms import model_to_dict
 
