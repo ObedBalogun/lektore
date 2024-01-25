@@ -26,24 +26,24 @@ class CourseService:
     @classmethod
     def get_course(cls, **kwargs):
         if not kwargs:
-            courses = Course.objects.select_related("tutor", "tutor__user").prefetch_related("course_enrollment").all()
+            courses = Course.objects.select_related("tutor", "tutor__user").prefetch_related("registered_tutees").all()
             return dict(message="All courses retrieved successfully",
                         data=[dict(course_name=course.course_name,
                                    course_id=course.course_id,
                                    tutor=dict(tutor_id=course.tutor.tutor_id,
                                               tutor_name=course.tutor.user.get_full_name()),
                                    created_date=course.created.strftime("%d %B %Y"),
-                                   download_count=course.course_enrollment.count(),
+                                   download_count=course.registered_tutees.count(),
                                    ) for course in courses])
         try:
             courses = Course.objects.select_related("tutor", "tutor__user").prefetch_related(
-                "course_enrollment").filter(**kwargs)
+                "registered_tutees").filter(**kwargs)
             return dict(data=[dict(course_name=course.course_name,
                                    course_id=course.course_id,
                                    tutor=dict(tutor_id=course.tutor.tutor_id,
                                               tutor_name=course.tutor.user.get_full_name()),
                                    created_date=course.created.strftime("%d %B %Y"),
-                                   download_count=course.course_enrollment.count(),
+                                   download_count=course.registered_tutees.count(),
                                    )
                               for course in courses],
                         message="All courses retrieved successfully")
