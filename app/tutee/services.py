@@ -1,4 +1,4 @@
-from app.course.models import Course
+from app.course.models import Course, Module
 from app.tutee.models import TuteeProfile, RegisteredTuteeCourse
 from django.forms import model_to_dict
 
@@ -65,3 +65,14 @@ class TuteeService:
         registered_course.save()
 
         return dict(data=model_to_dict(registered_course), message="Course has been updated")
+
+    @classmethod
+    def get_tutee_courses(cls, tutee_email):
+        registered_courses = RegisteredTuteeCourse.objects.select_related("course","tutee","module").filter(tutee__user__email=tutee_email)
+        return dict(data=list(registered_courses))
+
+    @classmethod
+    def register_course(cls, **kwargs):
+        course = Course.objects.get(course_id=kwargs.get("course_id"))
+        module = Module.objects.get(course_id=kwargs.get("course_id"))
+

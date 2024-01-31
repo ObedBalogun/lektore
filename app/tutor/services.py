@@ -16,8 +16,8 @@ class TutorService:
         if not tutor_id:
             tutors = TutorProfile.objects.all()
             serialized_data = TutorSerializer(data=tutors, many=True)
-            if not serialized_data.is_valid():
-                pass
+            serialized_data.is_valid(raise_exception=False)
+
             return dict(message="All tutors retrieved successfully",
                         data=serialized_data.data)
         try:

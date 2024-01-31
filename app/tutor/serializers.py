@@ -9,7 +9,7 @@ class TutorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TutorProfile
-        exclude = ['id', 'created', 'updated']
+        exclude = ['id', 'created', 'updated','current_country']
 
 
 class EducationSerializer(serializers.ModelSerializer):

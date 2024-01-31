@@ -145,6 +145,7 @@ class CourseViewSets(viewsets.ViewSet):
         return ResponseManager.handle_response(
             data=response.get("data"),
             message=response.get("message"),
+            errors=response.get("error"),
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
             else status.HTTP_200_OK,

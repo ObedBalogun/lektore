@@ -30,6 +30,8 @@ class CourseService:
             return dict(message="All courses retrieved successfully",
                         data=[dict(course_name=course.course_name,
                                    course_id=course.course_id,
+                                   course_overview=course.course_overview,
+                                   course_price=course.course_price,
                                    tutor=dict(tutor_id=course.tutor.tutor_id,
                                               tutor_name=course.tutor.user.get_full_name()),
                                    created_date=course.created.strftime("%d %B %Y"),
@@ -40,6 +42,8 @@ class CourseService:
                 "registered_tutees").filter(**kwargs)
             return dict(data=[dict(course_name=course.course_name,
                                    course_id=course.course_id,
+                                   course_overview=course.course_overview,
+                                   course_price=course.course_price,
                                    tutor=dict(tutor_id=course.tutor.tutor_id,
                                               tutor_name=course.tutor.user.get_full_name()),
                                    created_date=course.created.strftime("%d %B %Y"),
@@ -77,6 +81,7 @@ class ModuleService:
         course_id = kwargs.get("course_id")
         try:
             course = Course.objects.get(course_id=course_id)
+            print(course, course_id)
             module_details['course'] = course
             module_details.pop("course_id")
             module = Module.objects.create(**module_details)
