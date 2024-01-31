@@ -105,8 +105,6 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.CharField(blank=True, max_length=80, null=True)),
                 ('otp_is_verified', models.BooleanField(default=False)),
-                ('new_reset', models.BooleanField(default=False)),
-                ('new_verification', models.BooleanField(default=False)),
                 ('counter', models.IntegerField(default=0)),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
