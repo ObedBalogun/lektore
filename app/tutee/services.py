@@ -24,7 +24,7 @@ class TuteeService:
                             is_qualified=tutee.is_qualified
                         ) for tutee in tutees])
         try:
-            tutees = TuteeProfile.objects.select_related("user").prefetch_related("tutee_course_class__course").filter(
+            tutees = TuteeProfile.objects.select_related("user").filter(
                 **kwargs)
             return dict(message="Tutees retrieved successfully",
                         data=[dict(
