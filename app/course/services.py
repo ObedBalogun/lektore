@@ -38,8 +38,12 @@ class CourseService:
                                    download_count=course.registered_tutees.count(),
                                    ) for course in courses])
         try:
+            query_params = kwargs.copy()
+            if 'tutor_id' in query_params:
+                query_params["tutor__tutor_id"] = query_params["tutor_id"]
+                query_params.pop("tutor_id")
             courses = Course.objects.select_related("tutor", "tutor__user").prefetch_related(
-                "registered_tutees").filter(**kwargs)
+                "registered_tutees").filter(**query_params)
             return dict(data=[dict(course_name=course.course_name,
                                    course_id=course.course_id,
                                    course_overview=course.course_overview,
