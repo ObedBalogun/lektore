@@ -17,12 +17,13 @@ class TuteeProfile(CommonUserDetails):
     from_destination = CountryField(blank=True)
     to_destination = CountryField(blank=True)
     last_seen = models.DateField(null=True, blank=True)
+    courses = models.ManyToManyField(Course, related_name="students")
 
     def __str__(self):
         return f"{self.tutee_id}"
 
 
-class TuteeOrder(Timestamp):
+class CourseOrder(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="tutee_orders")
     tutee = models.ForeignKey(TuteeProfile, on_delete=models.PROTECT)
     purchase_status = models.BooleanField(default=False)
@@ -30,9 +31,9 @@ class TuteeOrder(Timestamp):
     def __str__(self):
         return self.course.course_name
 
-class RegisteredTuteeCourse(Timestamp):
+class TuteeProgress(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="registered_tutees")
-    module = models.ForeignKey(Module, on_delete=models.PROTECT, related_name="tutee_course_modules")
+    module = models.ForeignKey(Module, on_delete=models.PROTECT, related_name="tutee_completion")
     tutee = models.ForeignKey(TuteeProfile, on_delete=models.PROTECT, related_name="registered_courses")
     is_module_video_completed = models.BooleanField(default=False)
     is_module_audio_completed = models.BooleanField(default=False)

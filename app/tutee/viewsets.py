@@ -1,8 +1,6 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework import serializers
-
-from app.course.services import CourseService, ModuleService
 from app.serializers import inline_serializer
 from app.tutee.services import TuteeService
 
@@ -28,8 +26,7 @@ class TuteeViewset(viewsets.ViewSet, CustomResponseMixin):
 
     @action(detail=False, methods=["get"], url_path="get-courses")
     def tutee_courses(self, request):
-        tutee_email = request.user
-        response = TuteeService.get_tutee_courses(tutee_email)
+        response = TuteeService.get_tutee_courses(request)
         return ResponseManager.handle_response(
             errors=response.get("error", None),
             data=response.get("data", None),

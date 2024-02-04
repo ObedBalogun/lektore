@@ -85,7 +85,6 @@ class ModuleService:
         course_id = kwargs.get("course_id")
         try:
             course = Course.objects.get(course_id=course_id)
-            print(course, course_id)
             module_details['course'] = course
             module_details.pop("course_id")
             module = Module.objects.create(**module_details)
