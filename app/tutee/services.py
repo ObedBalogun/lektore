@@ -55,16 +55,20 @@ class TuteeService:
 
     @classmethod
     def update_course(cls, **kwargs):
-        registered_course = TuteeProfile.objects.select_related("tutee").get(
-            module__id=kwargs.get("module_id"),
-            tutee__tutee_id=kwargs.get("tutee_id"))
+        try:
+            tutee_progress = TuteeProgress.objects.select_related("tutee").get(
+                module__id=kwargs.get("module_id"),
+                course__course_id=kwargs.get("course_id"),
+                tutee__user__email=kwargs.get("user_email"))
 
-        for key, value in kwargs.items():
-            if key not in ["tutee_id", "module_id"] and not getattr(registered_course, key):
-                setattr(registered_course, key, value)
-        registered_course.save()
+            for key, value in kwargs.items():
+                if key not in ["course_id", "module_id","user_email"] and not getattr(tutee_progress, key):
+                    setattr(tutee_progress, key, value)
+            tutee_progress.save()
 
-        return dict(data=model_to_dict(registered_course), message="Course has been updated")
+            return dict(data=model_to_dict(tutee_progress), success="Course has been updated")
+        except TuteeProgress.DoesNotExist:
+            return dict(error="Tutor course does not exist")
 
     @classmethod
     def get_tutee_courses(cls, request):
@@ -76,13 +80,16 @@ class TuteeService:
 
         else:
             course_id = request.GET.get("course_id")
-            tutee_course_progress = TuteeProgress.objects.select_related("module","course").filter(course__course_id=course_id,
-                                                                 tutee__user__email=request.user)
+            tutee_course_progress = TuteeProgress.objects.select_related("module", "course").filter(
+                course__course_id=course_id,
+                tutee__user__email=request.user)
             course = tutee_course_progress.first().course
             return dict(data=dict(
                 course_name=course.course_name,
+                course_id=course.course_id,
                 modules=[
                     dict(
+                        module_id=module.module.pk,
                         module_name=module.module.module_name,
                         module_video=module.module.module_video,
                         module_audio=module.module.module_audio,

@@ -53,7 +53,7 @@ class TuteeViewset(viewsets.ViewSet, CustomResponseMixin):
     def update_module(self, request):
         serialized_data = inline_serializer(
             fields={
-                "tutee_id":serializers.CharField(max_length=100),
+                "course_id":serializers.CharField(max_length=100),
                 "module_id":serializers.CharField(max_length=100),
                 "is_module_video_completed":serializers.BooleanField(required=False,allow_null=True),
                 "is_module_audio_completed":serializers.BooleanField(required=False,allow_null=True),
@@ -64,5 +64,8 @@ class TuteeViewset(viewsets.ViewSet, CustomResponseMixin):
         if errors := self.validate_serializer(serialized_data):
             return errors
 
-        response = TuteeService.update_course(**serialized_data.data)
+        data_copy = serialized_data.data.copy()
+        data_copy['user_email'] = request.user
+
+        response = TuteeService.update_course(**data_copy)
         return self.response(response)
