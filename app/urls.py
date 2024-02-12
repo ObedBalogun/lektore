@@ -7,6 +7,7 @@ from app.chat.viewsets import ChatThreadViewSet, ChatMessageViewSet
 # from app.schedule.viewsets import ScheduleViewSet, AvailabilityViewSet
 from app.tutee.viewsets import TuteeViewset
 from app.tutor.viewsets import TutorViewset
+from app.video_conference.viewsets import VideoConference
 from app.views import SearchBar
 from app.user.viewsets import OTPViewSet, UserViewSet
 
@@ -27,6 +28,7 @@ router.register(r"chat-messages", ChatMessageViewSet, basename="chat-thread")
 # router.register(r"schedule", ScheduleViewSet, basename="schedule-view")
 # router.register(r"availability", AvailabilityViewSet, basename="availability-view")
 router.register(r"community", CommunityPostViewSets, basename="community")
+router.register(r"video", VideoConference, basename="video-app")
 
 # router.register(r"course", ModuleViewSets, basename="module")
 

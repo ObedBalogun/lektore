@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Type
 
 from django.contrib.auth import authenticate
@@ -8,19 +9,19 @@ from rest_framework.authtoken.models import Token
 from django.forms import model_to_dict
 
 from app.course.models import Course, Module
-from app.serializers import CustomTokenObtainPairSerializer
-from app.tutee.models import TuteeProfile
+from app.tutee.models import TuteeProfile, TuteeService
 from app.tutor.models import TutorProfile
 from app.shared_models import UserVerificationModel
 
 from app.helpers import user_login, user_logout, generate_key, GenerateID
+from datetime import timezone
 from decouple import config
 import base64
 import pyotp
 
-from app.utils.utils import EmailManager
 
-from azure.storage.blob import BlobServiceClient, ContentSettings
+from azure.storage.blob import BlobServiceClient, ContentSettings,generate_blob_sas, BlobSasPermissions
+
 
 
 class UserService:
@@ -43,6 +44,7 @@ class UserService:
                 )
             user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
                                        password=password)
+
             user.set_password(password)
             user.save()
             app_user = ""
@@ -53,16 +55,39 @@ class UserService:
                                                        profile_picture=profile_picture)
                 app_user = model_to_dict(app_user, exclude=["id", "nationality", "current_country"])
             if role == 'tutee':
+                moving_from = kwargs.get("moving_from")
+                moving_to = kwargs.get("moving_to")
+                profession = kwargs.get("profession")
+                years_of_experience = kwargs.get("years_of_experience")
+                services = kwargs.get("services")
                 tutee_id = GenerateID.generate_id(TuteeProfile, 5)
+
                 app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
                                                        nationality=nationality, gender=gender,
-                                                       profile_picture=profile_picture)
-                app_user = model_to_dict(app_user, exclude=["id", "nationality", "from_destination", "to_destination",
-                                                            "current_country"])
+                                                       profile_picture=profile_picture, moving_to=moving_to, moving_from=moving_from,
+                                                       years_of_experience=years_of_experience, profession=profession)
+
+                try:
+                    for service in services:
+                        tutee_service = TuteeService.objects.get(service=service)
+                        app_user.services.add(tutee_service)
+                        app_user.save()
+                except TuteeService.DoesNotExist:
+                    return dict(error="Tutee service does not exist",message="Please select a valid service")
+
+                app_user = dict(
+                    phone_number=app_user.phone_number,
+                    gender=app_user.gender,
+                    profile_picture=app_user.profile_picture or None,
+                    tutee_id=app_user.tutee_id,
+                    user=app_user.user.pk,
+                    experience_level=app_user.experience_level,
+                    service=[service.service for service in app_user.services.all()],
+                    is_qualified=app_user.is_qualified)
             otp, _ = OTPService.request_otp(request=request, user=user)
             app_user.update({"otp": otp})
             return dict(data=app_user,
-                        message=f"{role} with email, {email} successfully created")
+                        message=f"{role} with email, {email} successfully created", status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(e, "error")
@@ -322,8 +347,20 @@ class AzureStorageService:
         blob_client = cls.blob_service_client.get_blob_client(container=container_name, blob=f'{username}/{file_name}')
         content_settings = ContentSettings(content_type=file.content_type)
         blob_client.upload_blob(file, content_settings=content_settings)
-        return blob_client.url
 
+        sas_token = cls.generate_blob_sas_token(container_name,f'{username}/{file_name}')
+        return f"{blob_client.url}?{sas_token}"
+
+    @classmethod
+    def generate_blob_sas_token(cls, container_name, blob_name):
+        expiry = datetime.now(timezone.utc) + timedelta(days=3650)
+        return generate_user_delegation_sas(
+            account_name=cls.blob_service_client.account_name,
+            container_name=container_name,
+            blob_name=blob_name,
+            permission=BlobSasPermissions(read=True),
+            expiry=expiry
+        )
     @classmethod
     def download_file(cls, file_name, container_name, container_type):
         container_name = container_name.lower()

@@ -46,7 +46,7 @@ class UserViewSet(viewsets.ViewSet):
             message=response.get("message", None),
             status=status.HTTP_400_BAD_REQUEST
             if response.get("error", None)
-            else status.HTTP_200_OK,
+            else response.get("status") or status.HTTP_200_OK,
         )
 
     @action(detail=False, methods=["patch"], url_path="update-user")

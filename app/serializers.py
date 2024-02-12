@@ -33,6 +33,12 @@ class UserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     role = serializers.CharField(max_length=50)
     profile_picture = serializers.ImageField(required=False, allow_null=True)
+    moving_from = serializers.CharField(required=False, allow_null=True),
+    moving_to = serializers.CharField(required=False, allow_null=True)
+    years_of_experience = serializers.IntegerField(min_value=0,required=False, allow_null=True)
+    profession = serializers.CharField(required=False, allow_null=True)
+    is_refugee = serializers.BooleanField(required=False, allow_null=True)
+    services = serializers.ListSerializer(child=serializers.CharField(max_length=200,allow_null=True), required=False, allow_null=True)
 
 
 class UserDetailsSerializer(serializers.Serializer):
