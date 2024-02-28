@@ -1,9 +1,9 @@
 from app.tutee.models import TuteeProfile
-from app.course.models import VideoRoom
 from django.forms.models import model_to_dict
 from django.db.models import Q
 from rest_framework import status
 
+from .models import VideoRoom
 from ..tutor.models import TutorProfile
 
 

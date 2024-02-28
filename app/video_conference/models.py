@@ -2,8 +2,6 @@ import uuid
 
 from app.shared_models import Timestamp
 from django.db import models
-from django.contrib.auth.models import User
-
 from app.tutee.models import TuteeProfile
 from app.tutor.models import TutorProfile
 
