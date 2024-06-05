@@ -16,10 +16,10 @@ services:
       - lektore-redis
     environment:
       - DJANGO_SETTINGS_MODULE=lektore.settings
-      - DB_NAME=lektore
-      - DB_USER=lektoreadmin
-      - DB_PASSWORD=@50324435BH
-      - DB_HOST=lektore.database.windows.net
+      - DB_NAME= ${DB_NAME} #lektore
+      - DB_USER= ${DB_USER} #pihealth
+      - DB_PASSWORD=${DB_PASSWORD} #@UZUmymw@123
+      - DB_HOST=${DB_HOST} #pihealth.database.windows.net
       - DB_PORT=1433
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - REDIS_HOST=${REDIS_HOST}
