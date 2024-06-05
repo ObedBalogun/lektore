@@ -99,16 +99,16 @@ WSGI_APPLICATION = 'lektore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DB_NAME = config('LOCAL_DB_NAME')
-DB_USER = config('LOCAL_DB_USER')
-DB_HOST = config('LOCAL_DB_HOST')
-DB_PORT = config('LOCAL_DB_PORT')
-DB_PASSWORD = config('LOCAL_DB_PASSWORD')
+DB_NAME = config('DB_NAME')
+DB_USER = config('DB_USER')
+DB_HOST = config('DB_HOST')
+DB_PORT = config('DB_PORT')
+DB_PASSWORD = config('DB_PASSWORD')
 
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
+        'ENGINE': 'sql_server.pyodbc',
         'HOST': DB_HOST,
         'PORT': DB_PORT,
         'NAME': DB_NAME,
