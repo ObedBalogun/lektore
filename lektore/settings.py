@@ -108,7 +108,7 @@ DB_PASSWORD = config('DB_PASSWORD')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'sql_server.pyodbc',
+        'ENGINE': 'mssql',
         'HOST': DB_HOST,
         'PORT': DB_PORT,
         'NAME': DB_NAME,

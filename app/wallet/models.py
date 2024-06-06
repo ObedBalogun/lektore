@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 
 from app.commons import USER_CATEGORY, TRANSACTION_TYPE, TRANSACTION_CATEGORY
 from app.shared_models import Timestamp
-from django.contrib.postgres.indexes import BrinIndex
 
 
 class Wallet(Timestamp):
@@ -53,7 +52,7 @@ class WalletTransaction(Timestamp):
     payment_status = models.BooleanField(default=False)
     reference = models.CharField(max_length=256, null=True, blank=True)
 
-    class Meta:
-        indexes = (
-            BrinIndex(fields=['created']),
-        )
+    # class Meta:
+    #     indexes = (
+    #         BrinIndex(fields=['created']),
+    #     )
