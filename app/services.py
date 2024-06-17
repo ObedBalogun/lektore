@@ -232,7 +232,7 @@ class OTPService:
 
     @classmethod
     def get_user_otp(cls, request, user_email):
-        template = "email_verification"
+        template = "email_verificationn"
         try:
             user = User.objects.get(email=user_email)
             user_verification, created = EmailVerification.objects.get_or_create(user__email=user_email,
