@@ -7,7 +7,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.forms import model_to_dict
-
+from django.db import transaction
 from app.course.models import Course, Module
 from app.tutee.models import TuteeProfile, TuteeService
 from app.tutor.models import TutorProfile
@@ -27,6 +27,7 @@ from app.utils.utils import EmailManager
 
 class UserService:
     @classmethod
+    @transaction.atomic
     def create_user(cls, request, **kwargs) -> dict:
         first_name = kwargs.get("first_name")
         last_name = kwargs.get("last_name")
@@ -37,65 +38,66 @@ class UserService:
         nationality = kwargs.get("nationality")
         phone_number = kwargs.get("phone_number")
         profile_picture = kwargs.get("profile_picture")
-        try:
-            if user_exists := User.objects.filter(username=email).exists():
+        with transaction.atomic():
+            try:
+                if user_exists := User.objects.filter(username=email).exists():
+                    return dict(
+                        error="User already exists",
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
+                                           password=password)
+
+                user.set_password(password)
+                user.save()
+                app_user = ""
+                if role == 'tutor':
+                    tutor_id = GenerateID.generate_id(TutorProfile, 5)
+                    app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
+                                                           nationality=nationality, gender=gender,
+                                                           profile_picture=profile_picture)
+                    app_user = model_to_dict(app_user, exclude=["id", "nationality", "current_country"])
+                if role == 'tutee':
+                    moving_from = kwargs.get("moving_from")
+                    moving_to = kwargs.get("moving_to")
+                    profession = kwargs.get("profession")
+                    years_of_experience = kwargs.get("years_of_experience")
+                    services = kwargs.get("services")
+                    tutee_id = GenerateID.generate_id(TuteeProfile, 5)
+
+                    app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
+                                                           nationality=nationality, gender=gender,
+                                                           profile_picture=profile_picture, moving_to=moving_to, moving_from=moving_from,
+                                                           years_of_experience=years_of_experience, profession=profession)
+
+                    try:
+                        for service in services:
+                            tutee_service = TuteeService.objects.get(service=service)
+                            app_user.services.add(tutee_service)
+                            app_user.save()
+                    except TuteeService.DoesNotExist:
+                        return dict(error="Tutee service does not exist",message="Please select a valid service")
+
+                    app_user = dict(
+                        phone_number=app_user.phone_number,
+                        gender=app_user.gender,
+                        profile_picture=app_user.profile_picture or None,
+                        tutee_id=app_user.tutee_id,
+                        user=app_user.user.pk,
+                        experience_level=app_user.experience_level,
+                        service=[service.service for service in app_user.services.all()],
+                        is_qualified=app_user.is_qualified)
+                otp= OTPService.get_user_otp(request=request, user_email=user.email)
+                app_user.update({"otp": otp})
+                return dict(data=app_user,
+                            message=f"{role} with email, {email} successfully created", status=status.HTTP_201_CREATED)
+
+            except Exception as e:
+                print(e, "error")
                 return dict(
-                    error="User already exists",
+                    error=f"{e}",
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            user = User.objects.create(first_name=first_name, last_name=last_name, email=email, username=email,
-                                       password=password)
-
-            user.set_password(password)
-            user.save()
-            app_user = ""
-            if role == 'tutor':
-                tutor_id = GenerateID.generate_id(TutorProfile, 5)
-                app_user = TutorProfile.objects.create(user=user, tutor_id=tutor_id, phone_number=phone_number,
-                                                       nationality=nationality, gender=gender,
-                                                       profile_picture=profile_picture)
-                app_user = model_to_dict(app_user, exclude=["id", "nationality", "current_country"])
-            if role == 'tutee':
-                moving_from = kwargs.get("moving_from")
-                moving_to = kwargs.get("moving_to")
-                profession = kwargs.get("profession")
-                years_of_experience = kwargs.get("years_of_experience")
-                services = kwargs.get("services")
-                tutee_id = GenerateID.generate_id(TuteeProfile, 5)
-
-                app_user = TuteeProfile.objects.create(user=user, tutee_id=tutee_id, phone_number=phone_number,
-                                                       nationality=nationality, gender=gender,
-                                                       profile_picture=profile_picture, moving_to=moving_to, moving_from=moving_from,
-                                                       years_of_experience=years_of_experience, profession=profession)
-
-                try:
-                    for service in services:
-                        tutee_service = TuteeService.objects.get(service=service)
-                        app_user.services.add(tutee_service)
-                        app_user.save()
-                except TuteeService.DoesNotExist:
-                    return dict(error="Tutee service does not exist",message="Please select a valid service")
-
-                app_user = dict(
-                    phone_number=app_user.phone_number,
-                    gender=app_user.gender,
-                    profile_picture=app_user.profile_picture or None,
-                    tutee_id=app_user.tutee_id,
-                    user=app_user.user.pk,
-                    experience_level=app_user.experience_level,
-                    service=[service.service for service in app_user.services.all()],
-                    is_qualified=app_user.is_qualified)
-            otp, _ = OTPService.get_user_otp(request=request, user_email=user.email)
-            app_user.update({"otp": otp})
-            return dict(data=app_user,
-                        message=f"{role} with email, {email} successfully created", status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            print(e, "error")
-            return dict(
-                error=f"{e}",
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
     @classmethod
     def update_user(cls, **kwargs):
@@ -206,7 +208,7 @@ class OTPService:
     def generate_otp(user_email):
         otp_expiry_time = int(config("RESET_EXPIRY_TIME"))  # in minutes
         generated_token: str = generate_key(user_email)
-        encoded_token = base64.b32decode(generated_token.encode())
+        encoded_token = base64.b32encode(generated_token.encode())
         otp = pyotp.TOTP(encoded_token, 6, interval=otp_expiry_time)
         return otp
 
@@ -230,11 +232,11 @@ class OTPService:
 
     @classmethod
     def get_user_otp(cls, request, user_email):
-        template = "email_verification.html"
+        template = "email_verification"
         try:
-            user = User.objects.get(user__email=user_email)
+            user = User.objects.get(email=user_email)
             user_verification, created = EmailVerification.objects.get_or_create(user__email=user_email,
-                                                                                 defaults={user: user})
+                                                                                 defaults=dict(user=user))
             if created:
                 otp = cls.generate_otp(user_email)
                 cls.send_verification_mail(request, user_email, template, otp)
