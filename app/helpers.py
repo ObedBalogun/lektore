@@ -31,7 +31,7 @@ def user_logout(request):
 def generate_key(email) -> str:
     return (
             str(email).lower()
-            + str(datetime.date(datetime.now()))
+            + str(datetime.now().date())
             + settings.SECRET_KEY
     )
 

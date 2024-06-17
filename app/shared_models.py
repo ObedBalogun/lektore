@@ -40,3 +40,9 @@ class UserVerificationModel(models.Model):
 
     def __str__(self):
         return str(self.email)
+class EmailVerification(Timestamp):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    otp_is_verified = models.BooleanField(blank=False, default=False)
+
+    def __str__(self):
+        return str(self.user.email)
