@@ -7,6 +7,7 @@ from typing import Dict, Union, List
 from rest_framework.response import Response
 import threading
 from rest_framework.pagination import PageNumberPagination
+from decouple import config
 
 
 class CustomPagination(PageNumberPagination):
@@ -130,7 +131,7 @@ class EmailManager:
         data["email_body"] = render_to_string(email_template_name, data)
 
         email = EmailMessage(
-            subject=data['email_subject'], body=data["email_body"] or data, from_email='obedbalogun@gmail.com',
+            subject=data['email_subject'], body=data["email_body"] or data, from_email=config('EMAIL_SENDER'),
             to=[data["to_email"]])
         email.content_subtype = "html"
         EmailThread(email).start()
