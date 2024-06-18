@@ -133,7 +133,8 @@ class OTPViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["get"], url_path="request")
     def request_otp(self, request):
-        response = OTPService.request_otp(request)
+        user_email = request.GET.get("email")
+        response = OTPService.get_user_otp(request, user_email)
         return ResponseManager.handle_response(
             errors=response.get("error", None),
             message=response.get("message", None),
@@ -144,7 +145,9 @@ class OTPViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["post"], url_path="verify-email")
     def verify_otp(self, request):
-        _, response = OTPService.verify_email_otp(request)
+        user_email = request.POST.get("email")
+        user_otp = request.POST.get("otp")
+        response = OTPService.verify_otp(user_email,user_otp)
         return ResponseManager.handle_response(
             errors=response.get("error", None),
             message=response.get("success", None),

@@ -245,15 +245,17 @@ class OTPService:
             print(e)
 
     @classmethod
-    def verify_otp(cls, user_email):
+    def verify_otp(cls, user_email, user_otp):
         try:
             user_verification_model = EmailVerification.objects.get(email=user_email)
             otp = cls.generate_otp(user_email)
-            user_verification_model.verified = otp.verify(user_email)
+            user_verification_model.verified = otp.verify(user_otp)
             user_verification_model.save()
-            return user_verification_model.verified
+            if user_verification_model.verified:
+                return dict(data=f"{otp}", message="OTP verified")
+            return dict(error=f"{otp} not verified", message="Unable to verify user OTP")
         except ObjectDoesNotExist:
-            return False
+            return dict(error="User otp does not exist")
 
 
 class SearchBarService:
