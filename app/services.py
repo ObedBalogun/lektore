@@ -14,7 +14,7 @@ from app.tutor.models import TutorProfile
 from app.shared_models import UserVerificationModel, EmailVerification
 
 from app.helpers import user_login, user_logout, generate_key, GenerateID
-from datetime import timezone
+from azure.identity import DefaultAzureCredential
 from decouple import config
 import base64
 import pyotp
@@ -283,10 +283,13 @@ class SearchBarService:
 class AzureStorageService:
     connect_str = config('AZURE_CONNECTION_STRING')
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    account_name = blob_service_client.account_name
+    credential = DefaultAzureCredential()
 
     @classmethod
     def list_containers(cls):
-        return cls.blob_service_client.list_containers()
+        containers = cls.blob_service_client.list_containers()
+        return [container.name for container in containers]
 
     @classmethod
     def create_container(cls, container_name, container_type):
@@ -304,26 +307,35 @@ class AzureStorageService:
     def upload_file(cls, file, file_name, container_name, username):
         blob_client = cls.blob_service_client.get_blob_client(container=container_name, blob=f'{username}/{file_name}')
         content_settings = ContentSettings(content_type=file.content_type)
-        blob_client.upload_blob(file, content_settings=content_settings)
+        blob_client.upload_blob(file, content_settings=content_settings, overwrite=True)
 
-        sas_token = cls.generate_blob_sas_token(container_name,f'{username}/{file_name}')
+        sas_token = cls.generate_blob_sas_token(container_name, f'{username}/{file_name}')
         return f"{blob_client.url}?{sas_token}"
 
     @classmethod
     def generate_blob_sas_token(cls, container_name, blob_name):
-        expiry = datetime.now(timezone.utc) + timedelta(days=3650)
-        return generate_user_delegation_sas(
-            account_name=cls.blob_service_client.account_name,
+        expiry = datetime.utcnow() + timedelta(days=3650)
+        return generate_blob_sas(
+            account_name=cls.account_name,
             container_name=container_name,
             blob_name=blob_name,
+            account_key=cls.blob_service_client.credential.account_key,
             permission=BlobSasPermissions(read=True),
-            expiry=expiry
+            expiry=expiry,
         )
+
     @classmethod
     def download_file(cls, file_name, container_name, container_type):
         container_name = container_name.lower()
-        blob_client = cls.blob_service_client.get_container_client(container=container_name)
-        return blob_client.download_blob(blob=file_name)
+        if container_type == "pdf":
+            container_name = f"{container_name}-pdf"
+        elif container_type == "image":
+            container_name = f"{container_name}-images"
+        elif container_type == "video":
+            container_name = f"{container_name}-videos"
+        blob_client = cls.blob_service_client.get_blob_client(container=container_name, blob=file_name)
+        download_stream = blob_client.download_blob()
+        return download_stream.readall()
 
     @classmethod
     def delete_file(cls, file_name, container_name, container_type):
