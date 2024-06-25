@@ -10,7 +10,7 @@ class VideoRoom(Timestamp):
     room_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     room_name = models.CharField(max_length=128)
     room_description = models.CharField(max_length=200)
-    online_users = models.ManyToManyField(TuteeProfile, blank=True)
+    online_users = models.ManyToManyField(TuteeProfile, blank=True, verbose_name="Invited Users")
     created_by = models.ForeignKey(TutorProfile, related_name="tutor_rooms", null=True, blank=True, on_delete=models.CASCADE)
     duration = models.DateTimeField(null=True)
 

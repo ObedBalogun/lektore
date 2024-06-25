@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import F
 from django.contrib.auth.models import User
 
 from app.commons import USER_CATEGORY, TRANSACTION_TYPE, TRANSACTION_CATEGORY
@@ -15,31 +16,25 @@ class Wallet(Timestamp):
     def __str__(self):
         return self.user.username
 
-    def credit_wallet(self, amount, kobo=False):
+    def get_wallet_balance(self):
+        self.refresh_from_db()
+        return self.balance
+
+    def credit_wallet(self, amount):
         if not amount or amount == 0:
             return False
-        try:
-            if kobo:
-                self.balance = int(self.balance) + amount/100
-            else:
-                self.balance = int(self.balance) + amount
-            self.save()
-        except ValueError:
-            return False
+        self.balance = F('balance') + amount
+        self.save()
         return True
 
-    def debit_wallet(self, amount, kobo=False):
-        if not amount or amount == 0:
+    def debit_wallet(self, amount):
+        if amount <= 0:
             return False
-        try:
-            if kobo:
-                amount = amount / 100
-            if amount > self.balance:
-                return False
-            self.balance = self.balance - amount
-            self.save()
-        except ValueError:
+        if amount > self.balance:
             return False
+
+        self.balance = F('balance') - amount
+        self.save()
         return True
 
 

@@ -6,6 +6,7 @@ from app.tutee.models import TuteeProfile
 from app.tutor.models import TutorProfile, EducationalQualification
 from app.chat.models import ChatThread, ChatMessage
 from app.shared_models import UserVerificationModel
+from app.video_conference.models import *
 # from app.schedule.models import Schedule, Availability
 from app.wallet.models import Wallet, WalletTransaction
 
@@ -38,6 +39,7 @@ class WalletTransactionAdmin(admin.ModelAdmin):
 
 admin.site.register(ChatThread)
 admin.site.register(ChatMessage)
+admin.site.register(VideoRoom)
 # admin.site.register(Schedule)
 # admin.site.register(Availability)
 admin.site.register(Wallet)

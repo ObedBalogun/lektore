@@ -3,21 +3,24 @@ from app.utils.utils import CustomResponseMixin, ResponseManager
 from rest_framework.decorators import action
 from rest_framework import viewsets, permissions, status, serializers
 from .services import VideoService
+from ..permissions import IsTutor
+
+
 class VideoConference(viewsets.ViewSet, CustomResponseMixin):
-    permission_classes = [permissions.IsAuthenticated]
-    @action(detail=False, methods=["post"], url_path="create-room")
+    # permission_classes = [permissions.IsAuthenticated]
+    @action(detail=False, methods=["post"], url_path="create-room",permission_classes=[IsTutor])
     def create_room(self, request):
         serialized_data = inline_serializer(
             fields={
                 "tutor_id":serializers.CharField(max_length=10),
                 "room_description":serializers.CharField(max_length=10),
-                "room_name":serializers.CharField(max_length=256)
+                "room_name":serializers.CharField(max_length=256),
+                "invitees":serializers.ListSerializer(child=serializers.CharField(max_length=256))
             },
             data=request.data
         )
         if errors := self.validate_serializer(serialized_data):
             return errors
-
         response = VideoService.create_room(**serialized_data.data)
         return self.response(response)
     @action(detail=False, methods=["get"], url_path="get-room")

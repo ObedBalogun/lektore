@@ -11,9 +11,13 @@ class VideoService:
     @classmethod
     def get_room(cls, request):
         try:
-            room = VideoRoom.objects.get(
+            video_room = VideoRoom.objects.get(
                 Q(room_name__iexact=request.GET.get("room_name")) | Q(room_id=request.GET.get("room_id")))
-            return dict(data=model_to_dict(room), message="Room gotten")
+            return dict(data=dict(
+                room_id=video_room.room_id,
+                room_name=video_room.room_description,
+                room_description=video_room.room_description,
+                invitees=[tutee.tutee_id for tutee in video_room.online_users.all()]), message="Room gotten")
         except VideoRoom.DoesNotExist:
             return dict(error="Room does not exist")
 
@@ -22,15 +26,21 @@ class VideoService:
         room_name = kwargs.get("room_name")
         room_description = kwargs.get("room_description")
         tutor_id = kwargs.get("tutor_id")
+        invitees = kwargs.get("invitees")
 
         try:
             tutor = TutorProfile.objects.get(tutor_id=tutor_id)
             video_room = VideoRoom.objects.create(room_name=room_name,
                                                   room_description=room_description, created_by=tutor)
+            for tutee in invitees:
+                tutee_profile = TuteeProfile.objects.get(tutee_id=tutee)
+                video_room.online_users.add(tutee_profile)
+                video_room.save()
             return dict(data=dict(
                 room_id=video_room.room_id,
                 room_name=video_room.room_description,
-                room_description=video_room.room_description),
+                room_description=video_room.room_description,
+                invitees=[tutee.tutee_id for tutee in video_room.online_users.all()]),
                 success="Room created successfully", status=status.HTTP_201_CREATED)
         except Exception as e:
             return dict(error=str(e))
