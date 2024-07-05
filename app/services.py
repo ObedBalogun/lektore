@@ -247,7 +247,7 @@ class OTPService:
     @classmethod
     def verify_otp(cls, user_email, user_otp):
         try:
-            user_verification_model = EmailVerification.objects.get(email=user_email)
+            user_verification_model = EmailVerification.objects.get(user__email=user_email)
             otp = cls.generate_otp(user_email)
             user_verification_model.verified = otp.verify(user_otp)
             user_verification_model.save()

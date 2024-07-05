@@ -63,6 +63,7 @@ class UserViewSet(viewsets.ViewSet):
                 "nationality": serializers.CharField(required=False),
                 "username": serializers.CharField(required=False),
                 "role": serializers.CharField(required=False),
+                "dashboard_wallpaper": serializers.ImageField(required=False, null=True)
             },
             data=request.data)
 
@@ -87,6 +88,20 @@ class UserViewSet(viewsets.ViewSet):
             upload_file = AzureStorageService.upload_file(profile_picture, file_name, container_name,
                                                           copy_data['first_name'])
             copy_data.update({"profile_picture": str(upload_file)})
+        if dashboard_wallpaper := serialized_data.validated_data.get('dashboard_wallpaper', None):
+            image_extensions = config("IMAGE_EXTENSIONS").split(',')
+            file_name = dashboard_wallpaper.name
+            file_extension = file_name.split(".")[-1]
+            if file_extension.lower() not in image_extensions:
+                return ResponseManager.handle_response(
+                    errors=dict(error="Invalid file extension"),
+                    message="User was not updated.",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            container_name = config("AZURE_IMAGE_CONTAINER_NAME")
+            upload_file = AzureStorageService.upload_file(dashboard_wallpaper, file_name, container_name,
+                                                          copy_data['first_name'])
+            copy_data.update({"dashboard_wallpaper": str(upload_file)})
 
         response = UserService.update_user(**serialized_data.data)
         return ResponseManager.handle_response(

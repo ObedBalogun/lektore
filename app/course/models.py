@@ -6,7 +6,7 @@ from app.shared_models import Timestamp
 class Course(Timestamp):
     course_name = models.CharField(max_length=255)
     course_id = models.CharField(max_length=25, unique=True)
-    tutor = models.ForeignKey(TutorProfile, on_delete=models.CASCADE)
+    tutor = models.ForeignKey(TutorProfile, on_delete=models.CASCADE, related_name="courses")
     course_duration = models.FloatField(default=0)
     course_category = models.CharField(max_length=50)
     course_type = models.CharField(max_length=50, choices=(('live', 'Live'), ('other', 'Other')))

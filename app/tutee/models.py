@@ -5,6 +5,8 @@ from django_countries.fields import CountryField
 from app.commons import EXPERIENCE, SERVICES
 from app.course.models import Course, Module
 from app.shared_models import CommonUserDetails, Timestamp
+from app.tutor.models import TutorProfile
+
 
 class TuteeService(Timestamp):
     LEKTORE_SERVICES = (("ielts", "IELTS"), ("learn english", "Learn English"), ("elocution", ""),
@@ -13,6 +15,7 @@ class TuteeService(Timestamp):
 
     def __str__(self):
         return f"{self.service}"
+
 
 class TuteeProfile(CommonUserDetails):
     tutee_id = models.CharField(max_length=10, unique=True)
@@ -32,13 +35,11 @@ class TuteeProfile(CommonUserDetails):
         return f"{self.tutee_id}"
 
 
-
-
 class CourseOrder(Timestamp):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="tutee_orders")
     tutee = models.ForeignKey(TuteeProfile, on_delete=models.PROTECT)
     purchase_status = models.BooleanField(default=False)
-
+    course_tutor = models.ForeignKey(TutorProfile, on_delete=models.PROTECT, related_name="purchased_courses",null=True)
     def __str__(self):
         return self.course.course_name
 

@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.db.models import Sum
+
 from app.course.models import Course
 # from app.schedule.models import Schedule
 from app.tutor.models import TutorProfile, EducationalQualification
@@ -10,6 +12,30 @@ from app.wallet.models import Wallet
 
 
 class TutorService:
+    @classmethod
+    def tutor_dashboard(cls, request):
+        tutor = TutorProfile.objects.prefetch_related("purchased_courses").get(
+            user=request.user)
+        courses = tutor.courses.count()
+        user_wallet = Wallet.objects.get(user=request.user)
+        total_withdrawals = user_wallet.wallet_transactions.filter(transaction_type="debit",
+                                                                   payment_status=True).aggregate(Sum("amount"))
+        tutor_courses = tutor.courses.all()
+        purchased_courses = len(set(tutor.purchased_courses.all()))
+        overall_purchases = tutor.purchased_courses.filter(purchase_status=True).count()
+
+        # total_students = sum(
+        #     course.tutee_orders.count()
+        #     for course in tutor_courses
+        #     if hasattr(course, "tutor_courses")
+        # )
+
+        payload = dict(courses=courses, total_purchased_courses=overall_purchases,
+                       purchased_courses=purchased_courses, total_withdrawals=total_withdrawals.get("amount__sum") or 0,
+                       cover_image=tutor.dashboard_wallpaper)
+                       # tutor_courses=[(course.course_id,course.course_name) for course in tutor_courses])
+        return dict(data=payload, message="Tutor Dashboard")
+
     @classmethod
     def get_tutor(cls, **kwargs) -> dict:
         tutor_id = kwargs.get("tutor_id")
@@ -70,19 +96,3 @@ class EducationService:
                             data=model_to_dict(education, exclude=["id"]))
         except EducationalQualification.DoesNotExist:
             return dict(error="Qualification does not exist for user")
-
-    @classmethod
-    def dashboard(cls, request):
-        tutor = TutorProfile.objects.select_related("tutor_courses").get(user=request.user)
-        courses = tutor.tutor_courses.filter(is_active=True).count()
-        total_earnings = Wallet.objects.filter(user=request.user).balance
-        tutor_courses = tutor.tutor_courses.all()
-        total_students = sum(
-            course.tutee_orders.count()
-            for course in tutor_courses
-            if hasattr(course,"tutor_courses")
-        )
-
-        payload = dict(active_courses=courses, total_earnings=total_earnings,
-                       total_students=total_students)
-        return dict(data=payload)

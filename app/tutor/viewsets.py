@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 
+from app.permissions import IsTutor
 from app.services import AzureStorageService
 from app.tutor.models import TutorProfile
 from app.tutor.serializers import EducationSerializer
@@ -11,7 +12,7 @@ from decouple import config
 
 
 class TutorViewset(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsTutor]
 
     @action(detail=False, methods=["get"], url_path="get-tutor")
     def get_tutor(self, request):
@@ -151,4 +152,11 @@ class TutorViewset(viewsets.ViewSet):
 
     @action(detail=False, methods=["get"], url_path="tutor-dashboard")
     def dashboard(self, request):
-        response = EducationService.dashboard(request.user)
+        response = TutorService.tutor_dashboard(request)
+        return ResponseManager.handle_response(
+            data=response.get("data"),
+            message=response.get("message"),
+            status=status.HTTP_400_BAD_REQUEST
+            if response.get("error", None)
+            else status.HTTP_200_OK,
+        )

@@ -39,7 +39,7 @@ class Wallet(Timestamp):
 
 
 class WalletTransaction(Timestamp):
-    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="wallet_transaction")
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name="wallet_transactions")
     amount = models.DecimalField(default=0.00, decimal_places=2, max_digits=19)
     destination = models.CharField(max_length=250)
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE)

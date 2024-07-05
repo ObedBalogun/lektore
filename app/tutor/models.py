@@ -10,6 +10,7 @@ class TutorProfile(CommonUserDetails, Timestamp):
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="tutor_profile")
     is_verified = models.BooleanField(default=False)
     is_qualified = models.BooleanField(default=False)
+    dashboard_wallpaper =  models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         indexes = [
